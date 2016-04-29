@@ -1,0 +1,29 @@
+apply plugin: 'java'
+
+dependencies {
+    compile gradleApi()
+}
+ext {
+    sharedDir = file("${project.rootDir}/../shared")
+}
+
+repositories {
+    maven {
+        name 'MavenLocal' // for local builds only
+        url sharedDir
+    }
+}
+
+apply plugin: 'maven-publish'
+
+group = 'com.exactprosystems.testtools'
+version = '1.0.0'
+
+uploadArchives {
+    repositories {
+        maven {
+            name 'MavenLocal' // for local builds only
+            url sharedDir
+        }
+    }
+}
