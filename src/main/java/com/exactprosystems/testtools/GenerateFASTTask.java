@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.exactprosystems.testtools;
 
+import groovy.lang.Closure;
 import org.gradle.api.AntBuilder;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
@@ -23,13 +24,14 @@ import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.TaskExecutionException;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
 public class GenerateFASTTask extends DefaultTask {
 
     @TaskAction
-    public void generateXmlFAST() throws TaskExecutionException {
+    public void generateXmlFAST() throws TaskExecutionException, IOException {
 
         Project project = getProject();
         GradleFASTPluginExtension extension = getProject().getExtensions()
@@ -43,44 +45,41 @@ public class GenerateFASTTask extends DefaultTask {
         params.put("dir", inputFolderPath);
         params.put("include", "*.xml");
 
-        String xsltTempFilePath = outputFolderPath +
-                (xslPath.startsWith(File.separator) ? "" : File.separator) +
-                xslPath;
-        File xsltTempFile = new File(xsltTempFilePath);
+        try(InputStream fileInputXslt = GenerateFASTTask.class.getClassLoader().getResourceAsStream(xslPath)) {
 
-        try {
-            xsltTempFile.getParentFile().mkdirs();
-            xsltTempFile.createNewFile();
+            byte[] content = new byte[fileInputXslt.available()];
 
-            try(InputStream fileInputXslt = GenerateFASTTask.class.getClassLoader().getResourceAsStream(xslPath);
-                OutputStream fileOutputXslt = new FileOutputStream(xsltTempFile)) {
+            fileInputXslt.read(content);
 
-                byte[] content = new byte[fileInputXslt.available()];
+            final String xsltString = new String(content, StandardCharsets.UTF_8);
 
-                fileInputXslt.read(content);
-                fileOutputXslt.write(content);
+            FileTree dictionaries = project.fileTree(params);
 
-                FileTree dictionaries = project.fileTree(params);
+            final AntBuilder ant = getProject().getAnt();
 
-                AntBuilder ant = getProject().getAnt();
+            for (final File file : dictionaries) {
+                Map<String, Object> xsltParams = new HashMap<>();
 
-                for (final File file : dictionaries) {
-                    Map<String, Object> xsltParams = new HashMap<>();
+                xsltParams.put("extension", ".xml");
+                xsltParams.put("basedir", inputFolderPath);
+                xsltParams.put("includes", file.getName());
+                xsltParams.put("destdir", outputFolderPath);
 
-                    xsltParams.put("extension", ".xml");
-                    xsltParams.put("style", xsltTempFile.getCanonicalPath());
-                    xsltParams.put("basedir", inputFolderPath);
-                    xsltParams.put("includes", file.getName());
-                    xsltParams.put("destdir", outputFolderPath);
+                ant.invokeMethod("xslt", new Object[]{xsltParams, new Closure<Object>(this, this) {
 
-                    ant.invokeMethod("xslt", xsltParams);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if(xsltTempFile.exists()) {
-                xsltTempFile.delete();
+                    public void doCall(Object ignore) {
+                        ant.invokeMethod("style", new Object[]{new Closure<Object>(this, this) {
+
+                            public void doCall(Object ignore) {
+                                Map<String, String> xsltContentParam = new HashMap<>();
+
+                                xsltContentParam.put("value", xsltString);
+
+                                ant.invokeMethod("string", xsltContentParam);
+                            }
+                        }});
+                    }
+                }});
             }
         }
     }
