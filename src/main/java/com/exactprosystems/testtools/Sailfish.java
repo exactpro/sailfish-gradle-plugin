@@ -15,14 +15,16 @@
  ******************************************************************************/
 package com.exactprosystems.testtools;
 
-import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.gradle.api.Plugin;
+import org.gradle.api.Task;
 
 public class Sailfish implements Plugin<Project> {
 
     @Override
     public void apply(Project target) {
         target.getTasks().create("generateXmlFAST", ConvertFASTTemplate.class);
+        target.getTasks().create("writeBuildInfo", BuildInfoWriter.class);
         target.getTasks().create("writeFile", WriteFileTask.class);
     }
 }
