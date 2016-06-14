@@ -15,31 +15,30 @@
  ******************************************************************************/
 package com.exactprosystems.testtools;
 
-import groovy.lang.Closure;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.gradle.api.AntBuilder;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
 import org.gradle.api.file.FileTree;
 import org.gradle.api.tasks.Input;
+import org.gradle.api.tasks.InputDirectory;
 import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.TaskExecutionException;
 
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
+import groovy.lang.Closure;
 
 public class ConvertFASTTemplate extends DefaultTask {
 
-    @Input
     private String xslPath = "fast/fast2dict.xsl";
-    @Input
     private String inputFolderPath = "";
-    @Input
     private String outputFolderPath = "";
-
-    private File outputFolder = new File(outputFolderPath);
 
     @TaskAction
     public void generateXmlFAST() throws TaskExecutionException, IOException {
@@ -49,10 +48,6 @@ public class ConvertFASTTemplate extends DefaultTask {
         Map<String, String> params = new HashMap<>();
         params.put("dir", inputFolderPath);
         params.put("include", "*.xml");
-
-        if(!outputFolder.exists()) {
-            outputFolder.mkdirs();
-        }
 
         try(InputStream fileInputXslt = ConvertFASTTemplate.class.getClassLoader().getResourceAsStream(xslPath)) {
 
@@ -73,6 +68,7 @@ public class ConvertFASTTemplate extends DefaultTask {
                 xsltParams.put("basedir", inputFolderPath);
                 xsltParams.put("includes", file.getName());
                 xsltParams.put("destdir", outputFolderPath);
+                xsltParams.put("force", true);
 
                 ant.invokeMethod("xslt", new Object[]{xsltParams, new Closure<Object>(this, this) {
 
@@ -102,7 +98,6 @@ public class ConvertFASTTemplate extends DefaultTask {
         this.xslPath = xslPath;
     }
 
-    @Input
     public String getInputFolderPath() {
         return inputFolderPath;
     }
@@ -111,7 +106,6 @@ public class ConvertFASTTemplate extends DefaultTask {
         this.inputFolderPath = inputFolderPath;
     }
 
-    @Input
     public String getOutputFolderPath() {
         return outputFolderPath;
     }
@@ -122,10 +116,11 @@ public class ConvertFASTTemplate extends DefaultTask {
 
     @OutputDirectory
     public File getOutputFolder() {
-        return outputFolder;
+        return new File(this.outputFolderPath);
     }
-
-    public void setOutputFolder(File outputFolder) {
-        this.outputFolder = outputFolder;
+    
+    @InputDirectory
+    public File getInputFolder() {
+        return new File(this.inputFolderPath);
     }
 }
