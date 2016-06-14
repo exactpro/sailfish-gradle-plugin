@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<types>
+	<type qfj="UTCTIMESTAMP" dict="java.util.Date"/>
+	<type qfj="UTCTIMEONLY" dict="com.exactprosystems.common.util.DateTimeOnly" />
+	<type qfj="UTCDATE" dict="java.util.Date" />
+	<type qfj="UTCDATEONLY" dict="com.exactprosystems.common.util.DateWithoutTime" />
+	<type qfj="TIME" dict="java.util.Date" />
+	<type qfj="DATE" dict="java.util.Date" />
+	<type qfj="DAYOFMONTH" dict="java.lang.Integer" />
+	
+	<type qfj="STRING" dict="java.lang.String" />
+	<type qfj="CHAR" dict="java.lang.Character" />
+	<type qfj="PRICE" dict="java.math.BigDecimal" />
+	<type qfj="INT" dict="java.lang.Integer" />
+	<type qfj="LONG" dict="java.lang.Long" />
+	<type qfj="int" dict="java.lang.Integer" />
+	<type qfj="AMT" dict="java.math.BigDecimal" />
+	<type qfj="QTY" dict="java.math.BigDecimal" />
+	<type qfj="CURRENCY" dict="java.lang.String" />
+	<type qfj="BOOLEAN" dict="java.lang.Boolean" />
+	<type qfj="FLOAT" dict="java.math.BigDecimal" />
+	<type qfj="PRICEOFFSET" dict="java.math.BigDecimal" />
+	<type qfj="NUMINGROUP" dict="java.lang.Integer" />
+	<type qfj="PERCENTAGE" dict="java.math.BigDecimal" />
+	<type qfj="SEQNUM" dict="java.lang.Integer" />
+	<type qfj="LENGTH" dict="java.lang.Integer" />
+	<type qfj="COUNTRY" dict="java.lang.String" />
+	<type qfj="MULTIPLEVALUESTRING" dict="java.lang.String" />
+	
+	
+	
+	<type qfj="TZTIMESTAMP" dict="java.lang.String" />
+	<type qfj="TZTIMEONLY" dict="java.lang.String" />
+	<type qfj="MULTIPLESTRINGVALUE" dict="java.lang.String" />
+	<type qfj="LOCALMKTDATE" dict="java.lang.String" />
+	<type qfj="DATA" dict="java.lang.String" />
+	<type qfj="EXCHANGE" dict="java.lang.String" />
+	<type qfj="MONTHYEAR" dict="java.lang.String" />
+	<type qfj="MULTIPLECHARVALUE" dict="java.lang.String" />
+	<type qfj="MONTH-YEAR" dict="java.lang.String" />
+	<type qfj="DAY-OF-MONTH" dict="java.lang.String" />
+	
+	
+</types>

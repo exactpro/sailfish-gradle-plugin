@@ -15,9 +15,8 @@
  ******************************************************************************/
 package com.exactprosystems.testtools;
 
-import org.gradle.api.Project;
 import org.gradle.api.Plugin;
-import org.gradle.api.Task;
+import org.gradle.api.Project;
 
 public class Sailfish implements Plugin<Project> {
 
@@ -26,5 +25,6 @@ public class Sailfish implements Plugin<Project> {
         target.getTasks().create("generateXmlFAST", ConvertFASTTemplate.class);
         target.getTasks().create("writeBuildInfo", BuildInfoWriter.class);
         target.getTasks().create("writeFile", WriteFileTask.class);
+        target.getTasks().create("generateXmlFix", ConvertFixDictionary.class);
     }
 }
