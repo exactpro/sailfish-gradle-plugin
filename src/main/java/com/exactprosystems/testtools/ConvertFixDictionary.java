@@ -52,9 +52,9 @@ public class ConvertFixDictionary extends DefaultTask {
         }};
 
         Project project = getProject();
-        AntBuilder antBuilder = project.getAnt();
+        final AntBuilder antBuilder = project.getAnt();
         FileTree dictionaries = project.fileTree(fileTreeArgs);
-        String configurationPath = project.getConfigurations().getByName("compile").getAsPath();
+        final String configurationPath = project.getConfigurations().getByName("compile").getAsPath();
 
         Map<String, Object> xsltArgs = new HashMap<String, Object>() {{
             put("extension", ".xml");
