@@ -7,7 +7,7 @@ dependencies {
     compile gradleApi()
 
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
-    compile group: 'com.google.guava', name: 'guava', version: '18.0'
+    compile group: 'com.google.guava', name: 'guava-jdk5', version: '17.0'
 }
 ext {
     sharedDir = file("${project.rootDir}/../shared")
