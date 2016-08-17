@@ -5,6 +5,9 @@ apply plugin: 'eclipse'
 
 dependencies {
     compile gradleApi()
+
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
+    compile group: 'com.google.guava', name: 'guava', version: '18.0'
 }
 ext {
     sharedDir = file("${project.rootDir}/../shared")
