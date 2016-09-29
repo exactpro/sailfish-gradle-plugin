@@ -26,5 +26,6 @@ public class Sailfish implements Plugin<Project> {
         target.getTasks().create("writeBuildInfo", BuildInfoWriter.class);
         target.getTasks().create("writeFile", WriteFileTask.class);
         target.getTasks().create("generateXmlFix", ConvertFixDictionary.class);
+        target.getTasks().create("checkCompatibility", CompatibilityChecker.class);
     }
 }

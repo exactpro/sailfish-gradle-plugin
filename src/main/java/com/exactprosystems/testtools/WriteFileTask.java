@@ -68,7 +68,7 @@ public class WriteFileTask extends DefaultTask {
             }
         } else {
             throw new GradleScriptException("write can't be executed with outputDir: "
-                        + this.outputDir + " outputFile: " + this.fileName + " liens: " + this.lines, null);
+                        + this.outputDir + " outputFile: " + this.fileName + " lines: " + this.lines, null);
         }
     }
 
