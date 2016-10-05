@@ -18,12 +18,10 @@ package com.exactprosystems.testtools;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.Charset;
@@ -40,12 +38,12 @@ import javax.xml.transform.stream.StreamSource;
 
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
+import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.artifacts.PublishArtifact;
 import org.gradle.api.plugins.JavaPlugin;
-import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputDirectory;
 import org.gradle.api.tasks.InputFile;
 import org.gradle.api.tasks.TaskAction;
-import org.gradle.api.tasks.incremental.IncrementalTaskInputs;
 
 import com.google.common.io.Files;
 
@@ -80,10 +78,15 @@ public class CompatibilityChecker extends DefaultTask{
     @TaskAction
     public void checkCompatibility() throws Exception {
         
-        Project p = getProject();        
+        Project p = getProject();
         List<URL> urls = new ArrayList<>();
-        for (File f:p.getConfigurations().getByName(JavaPlugin.RUNTIME_CONFIGURATION_NAME).getFiles()) {
+        Configuration configuration = p.getConfigurations().getByName(JavaPlugin.RUNTIME_CONFIGURATION_NAME); 
+        for (File f:configuration.getFiles()) {
             urls.add(f.toURI().toURL());
+        }
+        
+        for (PublishArtifact f:configuration.getArtifacts()) {
+            urls.add(f.getFile().toURI().toURL());
         }
         classLoader = URLClassLoader.newInstance(urls.toArray(new URL[0]), this.getClass().getClassLoader());
         
