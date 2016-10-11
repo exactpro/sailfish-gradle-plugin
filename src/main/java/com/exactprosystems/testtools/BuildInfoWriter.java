@@ -19,7 +19,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -33,8 +35,6 @@ import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.TaskAction;
 
-import com.google.common.collect.Sets;
-
 public class BuildInfoWriter extends DefaultTask {
     private static final String CONFIGURATION_NAME = "compile";
 
@@ -46,16 +46,12 @@ public class BuildInfoWriter extends DefaultTask {
     private static final String BUILD_NUMBER_PROPERTY = "build_number";
     private static final String DICTIONARY_VERSION_PROPERTY = "dictVer";
     private static final String RELEASE_PROPERTY = "release";
+    private static final String GIT_HASH_PROPERTY = "git_hash";
 
     private static final String BUILD_INFO_FILE_NAME = "buildinfo.htm";
 
     private static final int HEADER_SIZE = 3;
-
-    public static void main(String[] args) throws IOException {
-        File f = new File("/home/ivan.druzhinin/buildinfo.htm");
-        List<String> lines = Files.readAllLines(f.toPath(), Charset.defaultCharset());
-        System.out.println(lines.size());
-    }
+    private static final int PROPERTIES_COUNT = 5;
 
     @TaskAction
     public void writeBuildInfo() throws IOException {
@@ -96,10 +92,10 @@ public class BuildInfoWriter extends DefaultTask {
             header = lines.subList(0, HEADER_SIZE);
             body = lines.subList(HEADER_SIZE, lines.size());
 
-            Set<String> components = Sets.newHashSet(StringUtils.split(header.get(2).replaceAll("<.*?>",  ","), ","));
-            Set<String> newComponents = buildInfoMap.keySet();
+            int columns = StringUtils.split(body.get(0).replaceAll("<.*?>",  ","), ",").length;
+            int newColumns = buildInfoMap.keySet().size() + PROPERTIES_COUNT;
 
-            if(!components.equals(newComponents)) {
+            if(columns != newColumns) {
                 List<String> newBody = new ArrayList<String>();
 
                 newBody.add("</table>");
@@ -108,7 +104,7 @@ public class BuildInfoWriter extends DefaultTask {
                 newBody.addAll(body);
 
                 body = newBody;
-                header = getHeader(newComponents);
+                header = getHeader(buildInfoMap.keySet());
             }
         } else {
             header = getHeader(buildInfoMap.keySet());
@@ -118,15 +114,21 @@ public class BuildInfoWriter extends DefaultTask {
         StringBuilder line = new StringBuilder();
 
         String buildNumber = projectProperties.get(BUILD_NUMBER_PROPERTY).toString();
+        String buildDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date());
         String dictVer = projectProperties.get(DICTIONARY_VERSION_PROPERTY).toString();
         String release = projectProperties.get(RELEASE_PROPERTY).toString();
+        String gitHash = projectProperties.get(GIT_HASH_PROPERTY).toString();
 
         line.append("<tr><td>");
         line.append(buildNumber);
         line.append("<td>");
+        line.append(buildDate);
+        line.append("<td>");
         line.append(dictVer);
         line.append("<td>");
         line.append(release);
+        line.append("<td>");
+        line.append(gitHash);
         line.append("<td>");
         line.append(StringUtils.join(buildInfoMap.values(), "<td>"));
 
@@ -143,7 +145,7 @@ public class BuildInfoWriter extends DefaultTask {
         List<String> header = new ArrayList<String>();
 
         header.add("<table border=\"1\" cellspacing=\"1\" cellpadding=\"2\" style=\"font-family:monospace\">");
-        header.add(String.format("<tr><th rowspan=2>Build Number<th rowspan=2>Dictionary Version<th rowspan=2>Release<th colspan=%s>Components", components.size()));
+        header.add(String.format("<tr><th rowspan=2>Build Number<th rowspan=2>Build Date<th rowspan=2>Dictionary Version<th rowspan=2>Release<th rowspan=2>Git Hash<th colspan=%s>Components", components.size()));
         header.add("<tr><th>" + StringUtils.join(components, "<th>"));
 
         return header;
