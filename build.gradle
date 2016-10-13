@@ -13,6 +13,9 @@ ext {
     sharedDir = file("${project.rootDir}/../shared")
 }
 
+sourceCompatibility = 1.7 //Java version compatibility to use when compiling Java source.
+targetCompatibility = 1.7 //Java version to generate classes for.
+
 buildscript { // artifacrory plugin
     repositories {
         if (project.hasProperty('repository')) {

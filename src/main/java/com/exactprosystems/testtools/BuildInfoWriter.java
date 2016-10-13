@@ -138,7 +138,7 @@ public class BuildInfoWriter extends DefaultTask {
         lines.add(line.toString());
         lines.addAll(body);
 
-        Files.write(buildInfoFile.toPath(), lines);
+        Files.write(buildInfoFile.toPath(), lines, Charset.defaultCharset());
     }
 
     private List<String> getHeader(Set<String> components) {

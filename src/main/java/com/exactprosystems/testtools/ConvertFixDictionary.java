@@ -78,24 +78,24 @@ public class ConvertFixDictionary extends DefaultTask {
 
             xsltArgs.put("style", xslFile);
 
-            Map<String, Object> mapperArgs = new HashMap<String, Object>() {{
+            final Map<String, Object> mapperArgs = new HashMap<String, Object>() {{
                 put("type", "glob");
                 put("from", "*.xml");
                 put("to", "*." + fileSuffix + ".xml");
             }};
 
-            Map<String, Object> prefixParamArgs = new HashMap<String, Object>() {{
+            final Map<String, Object> prefixParamArgs = new HashMap<String, Object>() {{
                put("name", "nsprefix");
                put("expression", fileSuffix + "_");
             }};
 
-            Map<String, Object> sessionDictionaryParamArgs = new HashMap<String, Object>() {{
+            final Map<String, Object> sessionDictionaryParamArgs = new HashMap<String, Object>() {{
                put("name", "sessionDictionary");
                put("expression", new File(inputDirectory, "FIXT11.xml").getAbsolutePath());
             }};
 
             for(File dictionary : dictionaries) {
-                String dictionaryName = dictionary.getName();
+                final String dictionaryName = dictionary.getName();
 
                 if(dictionaryName.startsWith("FIXT")) {
                     continue;
