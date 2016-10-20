@@ -18,6 +18,7 @@ package com.exactprosystems.testtools;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -41,8 +42,8 @@ import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.PublishArtifact;
 import org.gradle.api.plugins.JavaPlugin;
-import org.gradle.api.tasks.InputDirectory;
 import org.gradle.api.tasks.InputFile;
+import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.TaskAction;
 
 import com.google.common.io.Files;
@@ -70,10 +71,10 @@ public class CompatibilityChecker extends DefaultTask{
     private final static String CORE_VERSION = "CORE_VERSION";
     
     private ClassLoader classLoader;
-    @InputDirectory
-    private File cfgDir;
     @InputFile
     private File versionFile;
+    @InputFiles
+    private List<File> cfgDirs;
     
     @TaskAction
     public void checkCompatibility() throws Exception {
@@ -91,20 +92,23 @@ public class CompatibilityChecker extends DefaultTask{
         classLoader = URLClassLoader.newInstance(urls.toArray(new URL[0]), this.getClass().getClassLoader());
         
         boolean success = true; 
-        if (getCfgDir().exists()) {
-            File cfgFile = new File(getCfgDir(), loadStaticStringField(PLUGIN_LOADER, ACTIONS_XML_FILE_NAME));
-            if(cfgFile.exists()) {
-                success &= checkActions(classLoader, cfgFile);
-            }
+        for (File cfgDir : cfgDirs) {
+            System.out.println("Checking configDir:" + cfgDir);
+            if (cfgDir.exists()) {
+                File cfgFile = new File(cfgDir, loadStaticStringField(PLUGIN_LOADER, ACTIONS_XML_FILE_NAME));
+                if (cfgFile.exists()) {
+                    success &= checkActions(classLoader, cfgFile);
+                }
 
-            cfgFile = new File(getCfgDir(), loadStaticStringField(PLUGIN_LOADER, DICTIONARIES_XML_FILE_NAME));
-            if(cfgFile.exists()) {
-                success &= checkDictionaries(classLoader, cfgFile);
-            }
-            
-            cfgFile = new File(getCfgDir(), loadStaticStringField(PLUGIN_LOADER, SERVICES_XML_FILE_NAME));
-            if(cfgFile.exists()) {
-                success &= checkServices(classLoader, cfgFile);
+                cfgFile = new File(cfgDir, loadStaticStringField(PLUGIN_LOADER, DICTIONARIES_XML_FILE_NAME));
+                if (cfgFile.exists()) {
+                    success &= checkDictionaries(classLoader, cfgFile);
+                }
+
+                cfgFile = new File(cfgDir, loadStaticStringField(PLUGIN_LOADER, SERVICES_XML_FILE_NAME));
+                if (cfgFile.exists()) {
+                    success &= checkServices(classLoader, cfgFile);
+                }
             }
         }
 
@@ -116,7 +120,7 @@ public class CompatibilityChecker extends DefaultTask{
     }
 
     // checks action classes and utility classes attached to them
-    private static boolean checkActions(ClassLoader classLoader, File actionsFile) throws ClassNotFoundException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+    private boolean checkActions(ClassLoader classLoader, File actionsFile) throws ClassNotFoundException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
         String fileName = actionsFile.getAbsolutePath();
         System.out.println("Reading actions file: " + fileName);
 
@@ -151,28 +155,42 @@ public class CompatibilityChecker extends DefaultTask{
     }
 
     // checks utility classes attached to dictionaries
-    private static boolean checkDictionaries(ClassLoader classLoader, File dictionariesFile) throws ClassNotFoundException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+    private boolean checkDictionaries(ClassLoader classLoader, File dictionariesFile) throws ClassNotFoundException, IllegalAccessException,
+            IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
         String fileName = dictionariesFile.getAbsolutePath();
         System.out.println("Reading dictionaries file: " + fileName);
-
         try {
             Object root = unmarshal(dictionariesFile, classLoader.loadClass(DICTIONARIES)).getValue();
             Set<String> utilityClasses = new HashSet<String>();
 
-            for(Object dictionary : (Iterable<?>)root.getClass().getMethod("getDictionary").invoke(root)) {
-                for(Object className : (Iterable<?>)dictionary.getClass().getMethod("getUtilityClassName").invoke(dictionary)) {
+            boolean dictionariesOk = true;
+            for (Object dictionary : (Iterable<?>) root.getClass().getMethod("getDictionary").invoke(root)) {
+                String resourcePath = (String) dictionary.getClass().getMethod("getResource").invoke(dictionary);
+                boolean resourseFound = false;
+                for (File cfgDir : cfgDirs) {
+                    File resource = new File(cfgDir.getPath() + File.separator + "dictionaries" + File.separator + resourcePath);
+                    if (resource.exists()) {
+                        resourseFound = true;
+                        break;
+                    }
+                }
+                if (!resourseFound) {
+                    System.err.println(resourcePath + "doesn't exist in the plugin");
+                    dictionariesOk = false;
+                }
+                
+                for (Object className : (Iterable<?>) dictionary.getClass().getMethod("getUtilityClassName").invoke(dictionary)) {
                     utilityClasses.add((String) className);
                 }
             }
-
-            return checkUtilites(classLoader, utilityClasses);
-        } catch(JAXBException | FileNotFoundException e) {
+            return checkUtilites(classLoader, utilityClasses) & dictionariesOk;
+        } catch (JAXBException | IOException e) {
             System.out.println("Failed to read dictionaries file '" + fileName + "': " + e.getMessage());
             return false;
         }
     }
 
-    private static boolean checkServices(ClassLoader classLoader, File servicesFile) throws ClassNotFoundException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+    private boolean checkServices(ClassLoader classLoader, File servicesFile) throws ClassNotFoundException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
         String fileName = servicesFile.getAbsolutePath();
         System.out.println("Reading services file: " + fileName);
 
@@ -200,7 +218,7 @@ public class CompatibilityChecker extends DefaultTask{
         }
     }
 
-    private static boolean checkUtilites(ClassLoader classLoader, Set<String> utilityClasses) {
+    private boolean checkUtilites(ClassLoader classLoader, Set<String> utilityClasses) {
         boolean valid = true;
 
         for(String className : utilityClasses) {
@@ -218,7 +236,7 @@ public class CompatibilityChecker extends DefaultTask{
         return valid;
     }
 
-    private static <T> JAXBElement<T> unmarshal(File file, Class<T> targetClass) throws FileNotFoundException, JAXBException {
+    private <T> JAXBElement<T> unmarshal(File file, Class<T> targetClass) throws FileNotFoundException, JAXBException {
         InputStream fileStream = new FileInputStream(file);
         Unmarshaller unmarshaller = JAXBContext.newInstance(targetClass).createUnmarshaller();
 
@@ -236,20 +254,23 @@ public class CompatibilityChecker extends DefaultTask{
         }
     }
     
-    @InputDirectory
-    public File getCfgDir() {
-        return cfgDir;
-    }
-    @InputDirectory
-    public void setCfgDir(File cfgDir) {
-        this.cfgDir = cfgDir;
-    }
     @InputFile
     public File getVersionFile() {
         return versionFile;
     }
+    
     @InputFile
     public void setVersionFile(File versionFile) {
         this.versionFile = versionFile;
+    }
+    
+    @InputFiles
+    public List<File> getCfgDirs() {
+        return cfgDirs;
+    }
+
+    @InputFiles
+    public void setCfgDirs(List<File> cfgDirs) {
+        this.cfgDirs = cfgDirs;
     }
 }
