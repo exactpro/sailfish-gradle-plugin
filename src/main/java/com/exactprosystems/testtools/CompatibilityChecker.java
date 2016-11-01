@@ -76,6 +76,8 @@ public class CompatibilityChecker extends DefaultTask{
     @InputFiles
     private List<File> cfgDirs;
     
+    private boolean silent;
+    
     @TaskAction
     public void checkCompatibility() throws Exception {
         
@@ -111,10 +113,9 @@ public class CompatibilityChecker extends DefaultTask{
                 }
             }
         }
-
-        if(success) {
-            Files.append(String.format("%s: %s", loadStaticStringField(PLUGIN_VERSION, CORE_VERSION_PROPERTY), loadStaticStringField(PLUGIN_LOADER, CORE_VERSION)), getVersionFile(), Charset.defaultCharset());
-        } else {
+        
+        Files.append(String.format("%s: %s", loadStaticStringField(PLUGIN_VERSION, CORE_VERSION_PROPERTY), loadStaticStringField(PLUGIN_LOADER, CORE_VERSION)), getVersionFile(), Charset.defaultCharset());
+        if(!success && !silent) {
             throw new RuntimeException("Some classes of this plugin are incompatible with core");
         }
     }
@@ -272,5 +273,13 @@ public class CompatibilityChecker extends DefaultTask{
     @InputFiles
     public void setCfgDirs(List<File> cfgDirs) {
         this.cfgDirs = cfgDirs;
+    }
+    
+    public boolean getSilent() {
+        return silent;
+    }
+    
+    public void setSilent(boolean value) {
+        silent = value;
     }
 }
