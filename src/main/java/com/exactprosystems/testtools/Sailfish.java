@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2017 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2016 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,5 +27,6 @@ public class Sailfish implements Plugin<Project> {
         target.getTasks().create("writeFile", WriteFileTask.class);
         target.getTasks().create("generateXmlFix", ConvertFixDictionary.class);
         target.getTasks().create("checkCompatibility", CompatibilityChecker.class);
+        target.getTasks().create("validateDictionary", DictionaryValidatorPlugin.class);
     }
 }
