@@ -69,7 +69,7 @@ repositories {
 }
 
 group = 'com.exactprosystems.testtools'
-version = "2.5-SNAPSHOT"
+version = "2.6-dev-SNAPSHOT"
 
 uploadArchives {
     repositories.mavenDeployer {
