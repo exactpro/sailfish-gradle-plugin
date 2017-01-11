@@ -1,5 +1,5 @@
 apply plugin: 'java'
-apply plugin: 'artifactory'
+apply plugin: 'com.jfrog.artifactory'
 apply plugin: 'maven'
 apply plugin: 'eclipse'
 
@@ -7,6 +7,8 @@ dependencies {
     compile gradleApi()
 
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
+    compile 'commons-io:commons-io:1.4'
+    compile 'com.google.guava:guava:18.0'
 }
 
 ext {
@@ -38,9 +40,13 @@ buildscript { // artifacrory plugin
         }
     }
     dependencies {
-        classpath(group: 'org.jfrog.buildinfo', name: 'build-info-extractor-gradle', version: '2.2.+')
+        classpath(group: 'org.jfrog.buildinfo', name: 'build-info-extractor-gradle', version: '4.4.12')
         classpath(group: 'com.bmuschko', name: 'gradle-tomcat-plugin', version: '2.2.2')
     }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '3.3'
 }
 
 repositories {
@@ -68,8 +74,16 @@ repositories {
     }
 }
 
-group = 'com.exactprosystems.testtools'
-version = "2.6-dev-SNAPSHOT"
+artifactory {
+    publish {
+        defaults {
+            // Reference to Gradle configurations defined in the build script.
+            // This is how we tell the Artifactory Plugin which artifacts should be
+            // published to Artifactory.
+            publishConfigs('archives')
+        }
+    }
+}
 
 uploadArchives {
     repositories.mavenDeployer {
@@ -85,9 +99,11 @@ uploadArchives {
                                     + '/' + pom.artifactId
                                     + '/' + pom.version)
                             delete fileTree(dir: artifactDir, include: 'maven-metadata.xml*')
-                        }
                     }
-            }
+                }
         }
-    doFirst { sharedDir.mkdirs() }
+    }
 }
+
+group = 'com.exactprosystems.testtools'
+version = '2.6-dev-SNAPSHOT'
