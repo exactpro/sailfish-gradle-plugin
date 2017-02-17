@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <types>
-	<type qfj="UTCTIMESTAMP" dict="java.util.Date"/>
-	<type qfj="UTCTIMEONLY" dict="com.exactprosystems.common.util.DateTimeOnly" />
-	<type qfj="UTCDATE" dict="java.util.Date" />
-	<type qfj="UTCDATEONLY" dict="com.exactprosystems.common.util.DateWithoutTime" />
-	<type qfj="TIME" dict="java.util.Date" />
-	<type qfj="DATE" dict="java.util.Date" />
+	<type qfj="UTCMICROSECONDSTIMESTAMP" dict="org.threeten.bp.LocalDateTime"/>
+	<type qfj="UTCTIMESTAMP" dict="org.threeten.bp.LocalDateTime"/>
+	<type qfj="UTCTIMEONLY" dict="org.threeten.bp.LocalTime" />
+	<type qfj="UTCDATE" dict="org.threeten.bp.LocalDateTime" />
+	<type qfj="UTCDATEONLY" dict="org.threeten.bp.LocalDate" />
+	<type qfj="TIME" dict="org.threeten.bp.LocalDateTime" />
+	<type qfj="DATE" dict="org.threeten.bp.LocalDateTime" />
 	<type qfj="DAYOFMONTH" dict="java.lang.Integer" />
 	
 	<type qfj="STRING" dict="java.lang.String" />
