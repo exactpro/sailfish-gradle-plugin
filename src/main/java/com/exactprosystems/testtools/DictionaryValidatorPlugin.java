@@ -44,6 +44,8 @@ public class DictionaryValidatorPlugin extends DefaultTask {
     
     @TaskAction
     public void validateDictionary(IncrementalTaskInputs inputs) throws Exception {
+        
+        System.out.println(pendingGenDirs);
         init(inputs);
         
         boolean buildOK = true;
@@ -83,7 +85,7 @@ public class DictionaryValidatorPlugin extends DefaultTask {
     
     public void sourceDir(List<File> inputs, boolean useDefaultValidator) {
         for (File input:inputs) {
-            if (input == null || input.listFiles() == null) {
+            if (input == null || !input.isDirectory()) {
                 continue;
             }
             if (!useDefaultValidator) {
@@ -159,8 +161,10 @@ public class DictionaryValidatorPlugin extends DefaultTask {
     private void init(IncrementalTaskInputs inputs) {
         //include all files from CopyFromDataTask
         for (File directory:pendingGenDirs) {
-            Collections.addAll(allFiles, directory.listFiles());
-            genDirs.add(directory);
+            if (directory != null) {
+                Collections.addAll(allFiles, directory.listFiles());
+                genDirs.add(directory);
+            }
         }
         
         final List<File> outdated = new ArrayList<>();
