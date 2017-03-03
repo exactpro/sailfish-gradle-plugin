@@ -1,14 +1,12 @@
 package com.exactprosystems.testtools;
 
 import java.io.File;
-import java.io.FilenameFilter;
+import java.io.FileFilter;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.gradle.api.Action;
@@ -30,125 +28,101 @@ import com.google.common.collect.SetMultimap;
 import groovy.lang.Closure;
 
 public class DictionaryValidatorPlugin extends DefaultTask {
-    
+
     protected static final String XML_EXTENSION = "xml";
-    private final List<File> allFiles = new ArrayList<>();
-    private final List<File> genDirs = new ArrayList<>();
-    private final Set<File> pendingGenDirs = new HashSet<>();
+    private final List<File> sourceDirs = new ArrayList<>();
     private final SetMultimap<String, String> pendingRequests = HashMultimap.create();
     private final SetMultimap<String, String> excluded = HashMultimap.create();
-    private final SetMultimap<String, File> toValidate = HashMultimap.create(); 
     private String defaultValidator = "";
     private FileCollection classpath;
     private File outputDir = new File(getProject().getBuildDir(), "validated");
-    
+
     @TaskAction
     public void validateDictionary(IncrementalTaskInputs inputs) throws Exception {
-        
-        System.out.println(pendingGenDirs);
-        init(inputs);
-        
+
+        SetMultimap<String, File> toValidate = init(inputs);
+
         boolean buildOK = true;
-        for (String validator:toValidate.keySet()) {
-                buildOK &= validateFiles(validator, toValidate.get(validator));
+        for (String validator : toValidate.keySet()) {
+            System.out.println("Validate by: " + validator);
+            buildOK &= execCoreValidator(validator, toValidate.get(validator), classpath);
         }
-        System.out.println("validate by default validator");
-        //Check not validated dictionaries
-        buildOK &= validateFiles(defaultValidator, allFiles);
-        
+
         if (!buildOK) {
             outputDir.delete();
             throw new RuntimeException("Dictionary validation failed");
         }
     }
-    
+
     @Input
     public void setDefault(String name) {
         this.defaultValidator = name;
     }
-    
+
     public void validate(String name) {
         validate(defaultValidator, name);
     }
-    
+
     public void validate(String validator, String name) {
         pendingRequests.put(validator, name);
     }
-    
-    public void remove(String name) {
-        remove(defaultValidator, name);
-    }
-    
+
     public void remove(String validator, String name) {
         excluded.put(validator, name);
     }
+
+    public void sourceDir(List<File> inputs) {
+        sourceDirs.addAll(inputs);
+    }
+
+    @InputFiles
+    public List<File> getSourceDirs() {
+
+        return sourceDirs;
+    }
     
-    public void sourceDir(List<File> inputs, boolean useDefaultValidator) {
-        for (File input:inputs) {
-            if (input == null || !input.isDirectory()) {
-                continue;
-            }
-            if (!useDefaultValidator) {
-                pendingGenDirs.add(input);
-            } else {
-                Collections.addAll(allFiles, input.listFiles(new FilenameFilter() {
-                    @Override
-                    public boolean accept(File dir, String name) {
-                        return name.toLowerCase().endsWith(XML_EXTENSION);
-                    }
-                }));
+    
+    //without incrementaltaskInputs returns only directories
+    @InputFiles
+    public List<File> getFiles() {
+        List<File> result = new ArrayList<>();
+        
+        for (File sourceDir:sourceDirs) {
+            if (sourceDir.exists()) {
+                Collections.addAll(result, sourceDir.listFiles(new XMLFileNameFilter()));
             }
         }
+        
+        return result;
     }
-    
-    public void sourceDir(List<File> inputs) {
-        sourceDir(inputs,true);
-    }
-    
-    @InputFiles
-    public List<File> getGenDirs() {
-        return genDirs;
-    }
-    @InputFiles
-    public List<File> getAllFiles() {
-        return allFiles;
-    }
+
     @OutputDirectory
     public File getOutputDir() {
         return outputDir;
     }
-    
-    private List<File> resolveFiles(String pattern) {
+
+    private Collection<File> resolveFiles(String pattern, Collection<File> from) {
         List<File> ret = new ArrayList<>();
         Pattern p = Pattern.compile(pattern);
-        for (File dict:allFiles) {
+        for (File dict : from) {
             if (p.matcher(dict.getName()).matches()) {
-                ret.add(dict); 
+                ret.add(dict);
             }
         }
         return ret;
     }
-    
-    private boolean validateFiles(String validator, Collection<File> dictionary) {
-        try {
-            return execCoreValidator(validator, dictionary);
-        } finally {
-            allFiles.removeAll(dictionary);
-        }
-    }
-    
-    
-    private boolean execCoreValidator(final String validator, final Collection<File> dictionary) {
+
+    private boolean execCoreValidator(final String validator, final Collection<File> dictionary, final FileCollection classpath) {
         if (dictionary.size() == 0) {
             return true;
         }
         @SuppressWarnings("serial")
-        ExecResult result =  getProject().javaexec(new Closure<JavaExecSpec>(this, this) {
-            @SuppressWarnings({"unused" })
+        ExecResult result = getProject().javaexec(new Closure<JavaExecSpec>(this, this) {
+            @SuppressWarnings({ "unused" })
             void doCall() {
                 setProperty("classpath", classpath);
                 setProperty("main", "com.exactprosystems.testtools.util.DictionaryValidator");
-                List<Object> args = new ArrayList<>(dictionary.size()+1);
+                List<Object> args = new ArrayList<>(dictionary.size() + 1);
                 args.add(validator);
                 args.addAll(dictionary);
                 setProperty("args", args);
@@ -157,56 +131,81 @@ public class DictionaryValidatorPlugin extends DefaultTask {
         });
         return result.getExitValue() == 0;
     }
-    
-    private void init(IncrementalTaskInputs inputs) {
-        //include all files from CopyFromDataTask
-        for (File directory:pendingGenDirs) {
-            if (directory != null) {
-                Collections.addAll(allFiles, directory.listFiles());
-                genDirs.add(directory);
-            }
-        }
-        
+
+    private SetMultimap<String, File> init(IncrementalTaskInputs inputs) throws IOException {
+
+        SetMultimap<String, File> result = matchFiles(inputs, pendingRequests, excluded, sourceDirs);
+
+        classpath = getProject().getConfigurations().getByName(JavaPlugin.RUNTIME_CONFIGURATION_NAME);
+
+        return result;
+    }
+
+    private void intersectRequestsToOutdated(IncrementalTaskInputs inputs, Collection<File> files) {
+
         final List<File> outdated = new ArrayList<>();
         
         inputs.outOfDate(new Action<InputFileDetails>() {
             public void execute(InputFileDetails arg0) {
-                outdated.add(arg0.getFile());
+                try {
+                    outdated.add(arg0.getFile().getCanonicalFile());
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
             };
         });
         
-        allFiles.retainAll(outdated);
+        files.retainAll(outdated);
+    }
+
+    private SetMultimap<String, File> matchFiles(IncrementalTaskInputs inputs, SetMultimap<String, String> requests,
+            SetMultimap<String, String> excludedRequests, Collection<File> sourceDirs) throws IOException {
+
+        SetMultimap<String, File> result = HashMultimap.create();
+        Collection<File> allFiles = result.get(defaultValidator);
         
-        //search files in full file list
-        matchFiles();
-        matchExcluded();
+        collectXmlFiles(sourceDirs, allFiles);
+        intersectRequestsToOutdated(inputs, allFiles);
         
-        //exclude files not used defaultValidator
-        for (File gen:genDirs) {
-            if (gen.listFiles() != null) {
-                allFiles.removeAll(Arrays.asList(gen.listFiles()));
+        for (String validator : requests.keySet()) {
+            
+            if (validator.equals(defaultValidator)) {
+                continue;
+            }
+            
+            Collection<File> from = allFiles;
+            Collection<File> to = result.get(validator);
+
+            for (String regexp : requests.get(validator)) {
+                // resolve files for specified validator
+                Collection<File> mappedFiles = resolveFiles(regexp, from);
+                // exclude files from computed collection
+                for (String excludedregexp : excludedRequests.get(validator)) {
+                    mappedFiles.removeAll(resolveFiles(excludedregexp, mappedFiles));
+                }
+                to.addAll(mappedFiles);
+                from.removeAll(to);
             }
         }
-        classpath = getProject().getConfigurations().getByName(JavaPlugin.RUNTIME_CONFIGURATION_NAME);
+        return result;
     }
-    
-    private void matchFiles() {
-        for (String validator:pendingRequests.keySet()) {
-            for (String name:pendingRequests.get(validator)) {
-                toValidate.putAll(validator, resolveFiles(name));
-            }
-        }
-        pendingRequests.clear();
-    }
-    
-    private void matchExcluded() {
-        for (String validator:excluded.keySet()) {
-            for (String name:excluded.get(validator)) {
-                for (File toRemove:resolveFiles(name)) {
-                    toValidate.remove(validator, toRemove);
+
+    private void collectXmlFiles(Collection<File> sourceDirs, Collection<File> forFiles) throws IOException {
+
+        for (File sourceDir : sourceDirs) {
+            if (sourceDir.exists()) {
+                for (File canonicalFile : sourceDir.listFiles(new XMLFileNameFilter())) {
+                    forFiles.add(canonicalFile.getCanonicalFile());
                 }
             }
         }
-        excluded.clear();
+    }
+
+    private class XMLFileNameFilter implements FileFilter {
+
+        @Override
+        public boolean accept(File pathname) {
+            return pathname.getName().toLowerCase().endsWith(XML_EXTENSION) && pathname.isFile();
+        }
     }
 }
