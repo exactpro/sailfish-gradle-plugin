@@ -78,6 +78,8 @@ public class CompatibilityChecker extends DefaultTask{
     
     private boolean silent;
     
+    private int minCoreRevision = 0;
+
     @TaskAction
     public void checkCompatibility() throws Exception {
         
@@ -114,7 +116,8 @@ public class CompatibilityChecker extends DefaultTask{
             }
         }
         
-        Files.append(String.format("%s: %s", loadStaticStringField(PLUGIN_VERSION, CORE_VERSION_PROPERTY), loadStaticStringField(PLUGIN_LOADER, CORE_VERSION)), getVersionFile(), Charset.defaultCharset());
+        Files.append(String.format("%s: %s.%s", loadStaticStringField(PLUGIN_VERSION, CORE_VERSION_PROPERTY), loadStaticStringField(PLUGIN_LOADER, CORE_VERSION),
+                this.minCoreRevision), getVersionFile(), Charset.defaultCharset());
         if(!success && !silent) {
             throw new RuntimeException("Some classes of this plugin are incompatible with core");
         }
@@ -281,5 +284,13 @@ public class CompatibilityChecker extends DefaultTask{
     
     public void setSilent(boolean value) {
         silent = value;
+    }
+
+    public int getMinCoreRevision() {
+        return minCoreRevision;
+    }
+
+    public void setMinCoreRevision(int minCoreRevision) {
+        this.minCoreRevision = minCoreRevision;
     }
 }
