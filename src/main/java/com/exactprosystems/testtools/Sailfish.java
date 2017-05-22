@@ -28,5 +28,6 @@ public class Sailfish implements Plugin<Project> {
         target.getTasks().create("generateXmlFix", ConvertFixDictionary.class);
         target.getTasks().create("checkCompatibility", CompatibilityChecker.class);
         target.getTasks().create("validateDictionary", DictionaryValidatorPlugin.class);
+        target.getTasks().create("collectDependencies", DependencyCollector.class);
     }
 }

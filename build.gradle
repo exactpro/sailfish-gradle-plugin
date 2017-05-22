@@ -2,9 +2,15 @@ apply plugin: 'java'
 apply plugin: 'com.jfrog.artifactory'
 apply plugin: 'maven'
 apply plugin: 'eclipse'
+apply plugin: 'groovy'
+
+group = 'com.exactprosystems.testtools'
+version = '2.6-dev-SNAPSHOT'
+archivesBaseName = 'GradlePlugin'
 
 dependencies {
     compile gradleApi()
+    compile localGroovy()
 
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
     compile 'commons-io:commons-io:1.4'
@@ -12,11 +18,22 @@ dependencies {
 }
 
 ext {
-    sharedDir = file("${project.rootDir}/../shared")
+    sharedDir = file("${project.rootDir}/shared")
 }
 
 sourceCompatibility = 1.7 //Java version compatibility to use when compiling Java source.
 targetCompatibility = 1.7 //Java version to generate classes for.
+
+sourceSets {
+    main {
+        java {
+            srcDirs = []
+        }
+        groovy {
+            srcDirs = ['src/main/java', 'src/main/groovy']
+        }
+    }
+}
 
 buildscript { // artifacrory plugin
     repositories {
@@ -104,6 +121,3 @@ uploadArchives {
         }
     }
 }
-
-group = 'com.exactprosystems.testtools'
-version = '2.6-dev-SNAPSHOT'
