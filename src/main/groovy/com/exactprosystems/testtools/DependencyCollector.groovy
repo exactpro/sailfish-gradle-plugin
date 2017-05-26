@@ -41,6 +41,8 @@ class DependencyCollector extends DefaultTask {
     def publishResource = ''
     @Input
     def projectPath = ''
+    @Input
+    def isNode = false
 
 
     @TaskAction
@@ -110,7 +112,7 @@ class DependencyCollector extends DefaultTask {
             publishResource: publishResource,
             path: projectPath ?: "${rootPath.relativize(project.projectDir.toPath())}",
             buildArguments: buildArguments,
-            isNode: project.subprojects.asBoolean(),
+            isNode: project.subprojects.asBoolean() ?: isNode,
             repository: repository,
             environmentPath: environmentPath
         ]
