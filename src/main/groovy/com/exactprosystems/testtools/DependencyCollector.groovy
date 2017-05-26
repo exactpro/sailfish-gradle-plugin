@@ -35,6 +35,13 @@ class DependencyCollector extends DefaultTask {
     def incrementalBuild
     @Input
     def type = ''
+    @Input
+    def environmentPath = ''
+    @Input
+    def publishResource = ''
+    @Input
+    def projectPath = ''
+
 
     @TaskAction
     def collectDependencies() {
@@ -47,6 +54,11 @@ class DependencyCollector extends DefaultTask {
         }
 
         def outputFile = new File(outputPath)
+
+        if(outputFile.directory) {
+            throw new Exception('Dependency file path is a directory')
+        }
+
         def dependencyMap = outputFile.length() ? new JsonSlurper().parse(outputFile) : [:]
         def jarFiles = [] as Set
 
@@ -95,13 +107,15 @@ class DependencyCollector extends DefaultTask {
             dependencies: dependencies,
             subprojects: project.subprojects.collect { "${repository}-${it.name}" },
             type: type,
-            publishResource: "${rootPath.relativize(project.buildDir.toPath())}/release",
-            path: "${rootPath.relativize(project.projectDir.toPath())}",
+            publishResource: publishResource,
+            path: projectPath ?: "${rootPath.relativize(project.projectDir.toPath())}",
             buildArguments: buildArguments,
             isNode: project.subprojects.asBoolean(),
-            repository: repository
+            repository: repository,
+            environmentPath: environmentPath
         ]
 
+        outputFile.parentFile.mkdirs()
         def json = JsonOutput.prettyPrint(JsonOutput.toJson(dependencyMap))
         outputFile.text = json
     }
