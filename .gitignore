@@ -1,0 +1,13 @@
+.gradle
+
+#eclipse files
+.metadata
+.recommenders
+.settings
+.classpath
+.project
+RemoteSystemsTempFiles
+
+build
+shared
+bin
