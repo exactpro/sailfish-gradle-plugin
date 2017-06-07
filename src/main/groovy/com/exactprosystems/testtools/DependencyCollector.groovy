@@ -108,14 +108,12 @@ class DependencyCollector extends DefaultTask {
             }
         }
 
-        def rootPath = project.rootDir.parentFile.toPath()
-
         dependencyMap["${repository}-${project.name}"] = [
             dependencies: dependencies,
             subprojects: project.subprojects.collect { "${repository}-${it.name}" },
             type: type,
             publishResource: publishResource,
-            path: projectPath ?: "${rootPath.relativize(project.projectDir.toPath())}",
+            path: "${project.projectDir}",
             buildArguments: buildArguments,
             isNode: project.subprojects.asBoolean() ?: isNode,
             repository: repository,
