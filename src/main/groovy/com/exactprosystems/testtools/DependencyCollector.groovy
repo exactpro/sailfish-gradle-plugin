@@ -63,14 +63,19 @@ class DependencyCollector extends DefaultTask {
 
         def dependencyMap = outputFile.length() ? new JsonSlurper().parse(outputFile) : [:]
         def jarFiles = [] as Set
+        def unresolvedDependencies = false
 
         project.configurations.each { configuration ->
             configuration.allDependencies.grep {
                 it.group == 'com.exactprosystems.testtools'
             }.each { dependency ->
-                jarFiles.addAll(configuration.files(dependency).grep {
-                    (it.name.endsWith('jar') || it.name.endsWith('zip')) && it.name.contains(dependency.name)
-                })
+                try {
+                    jarFiles.addAll(configuration.files(dependency).grep {
+                        it.name.endsWith('jar') || it.name.endsWith('zip')
+                    })
+                } catch(Exception e) {
+                    unresolvedDependencies = true
+                }
             }
         }
 
@@ -114,7 +119,8 @@ class DependencyCollector extends DefaultTask {
             buildArguments: buildArguments,
             isNode: project.subprojects.asBoolean() ?: isNode,
             repository: repository,
-            environmentPath: environmentPath
+            environmentPath: environmentPath,
+            unresolvedDependencies: unresolvedDependencies
         ]
 
         outputFile.parentFile.mkdirs()
