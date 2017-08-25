@@ -214,12 +214,7 @@
 				<xsl:with-param name="size" select="2" />
 			</xsl:call-template>
 			<component name="{@name}">
-				<xsl:apply-templates mode="group"
-					select="dict:field[starts-with(@reference,'group')]"><xsl:with-param name="size" select="3"/></xsl:apply-templates>
-				<xsl:apply-templates mode="msg-field"
-					select="dict:field[starts-with(@reference,'field')]"><xsl:with-param name="size" select="3"/></xsl:apply-templates>
-				<xsl:apply-templates mode="component"
-					select="dict:field[starts-with(@reference,'component')]"><xsl:with-param name="size" select="3"/></xsl:apply-templates>
+				<xsl:apply-templates mode="msg" select="dict:field"><xsl:with-param name="size" select="3"/></xsl:apply-templates>
 				<xsl:call-template name="indent">
 					<xsl:with-param name="size" select="2" />
 				</xsl:call-template>
@@ -275,14 +270,15 @@
 				<xsl:otherwise>N</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
+		<xsl:variable name="id" select="@reference"/>
 		<xsl:choose>
-			<xsl:when test="starts-with(@reference,'component')">
+			<xsl:when test="./ancestor::dict:dictionary/descendant::dict:message[@id = $id]/dict:attribute[@name = 'entity_type'] = 'Component'">
 				<xsl:call-template name="indent">
 					<xsl:with-param name="size" select="$size" />
 				</xsl:call-template>
 				<component name="{@name}" required="{$isRequired}" />
 			</xsl:when>
-			<xsl:when test="starts-with(@reference,'group')">
+			<xsl:when test="./ancestor::dict:dictionary/descendant::dict:message[@id = $id]/dict:attribute[@name = 'entity_type'] = 'Group'">
 				<xsl:apply-templates mode="group" select="."><xsl:with-param name="size" select="$size"/></xsl:apply-templates>
 			</xsl:when>
 			<xsl:otherwise>
@@ -337,10 +333,11 @@
 	<!-- Transforming fields in message -->
 	<xsl:template match="dict:field" mode="msg">
 		<xsl:param name="size" />
+		<xsl:variable name="id" select="@reference"/>
 		<xsl:choose>
-			<xsl:when test="starts-with(@reference,'field')"><xsl:apply-templates mode="msg-field" select="." ><xsl:with-param name="size" select="$size"/></xsl:apply-templates></xsl:when>
-			<xsl:when test="starts-with(@reference,'group')"><xsl:apply-templates mode="group" select="."><xsl:with-param name="size" select="$size"/></xsl:apply-templates></xsl:when>
-			<xsl:when test="starts-with(@reference,'component')"><xsl:apply-templates mode="component" select="."><xsl:with-param name="size" select="$size"/></xsl:apply-templates></xsl:when>
+			<xsl:when test="./ancestor::dict:dictionary/descendant::dict:field[@id = $id]"><xsl:apply-templates mode="msg-field" select="." ><xsl:with-param name="size" select="$size"/></xsl:apply-templates></xsl:when>
+			<xsl:when test="./ancestor::dict:dictionary/descendant::dict:message[@id = $id]/dict:attribute[@name = 'entity_type'] = 'Group'"><xsl:apply-templates mode="group" select="."><xsl:with-param name="size" select="$size"/></xsl:apply-templates></xsl:when>
+			<xsl:when test="./ancestor::dict:dictionary/descendant::dict:message[@id = $id]/dict:attribute[@name = 'entity_type'] = 'Component'"><xsl:apply-templates mode="component" select="."><xsl:with-param name="size" select="$size"/></xsl:apply-templates></xsl:when>
 		</xsl:choose>
 	</xsl:template>
 	

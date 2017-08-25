@@ -142,7 +142,14 @@
 						
 					<dict:attribute name="allowOtherValues" type="java.lang.Boolean"><xsl:value-of select="@allowOtherValues" /></dict:attribute>
 				</xsl:if>
-				<xsl:apply-templates select="*" />
+				<xsl:variable name="name" select="@name"/>
+				<xsl:apply-templates select="$sessDict/fix/fields/field[@name = $name]/value" />
+				<xsl:for-each select="value">
+					<xsl:variable name="enum" select="@enum"/>
+					<xsl:if test="not ($sessDict/fix/fields/field[@name = $name]/value[@enum = $enum])">
+						<xsl:apply-templates select="." />
+					</xsl:if>
+				</xsl:for-each>
 
 			<xsl:call-template name="indent">
 				<xsl:with-param name="size" select="2"/>
