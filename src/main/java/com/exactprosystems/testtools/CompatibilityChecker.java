@@ -20,8 +20,10 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -29,6 +31,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.xml.bind.JAXBContext;
@@ -55,7 +58,8 @@ public class CompatibilityChecker extends DefaultTask{
     private final static String I_SERVICE = BASE_CLASSPATH + "services.IService";
     private final static String I_UTILITY_CALLER = BASE_CLASSPATH + "scriptrunner.utilitymanager.IUtilityCaller";
     private final static String I_ACTION_CALLER = BASE_CLASSPATH + "scriptrunner.actionmanager.IActionCaller";
-    private final static String PLUGIN_VERSION = BASE_CLASSPATH + "center.impl.PluginVersion";
+    private final static String VERSION_CLASS = BASE_CLASSPATH + "center.IVersion";
+    private final static String CORE_VERSION_CLASS = BASE_CLASSPATH + "center.impl.CoreVersion";
     private final static String ACTIONS = BASE_CLASSPATH + "aml.legacy.Actions";
     private final static String ACTION_DEFINITION = BASE_CLASSPATH + "aml.legacy.ActionDefinition";
     private final static String CLASS_NAME = BASE_CLASSPATH + "aml.legacy.ClassName";
@@ -116,7 +120,8 @@ public class CompatibilityChecker extends DefaultTask{
             }
         }
         
-        Files.append(String.format("%s: %s.%s", loadStaticStringField(PLUGIN_VERSION, CORE_VERSION_PROPERTY), loadStaticStringField(PLUGIN_LOADER, CORE_VERSION),
+        Files.append(String.format("%s: %s.%s.%s", loadStaticStringField(VERSION_CLASS, CORE_VERSION_PROPERTY),
+                loadStringGetter(CORE_VERSION_CLASS, "getMajor"), loadStringGetter(CORE_VERSION_CLASS, "getMinor"),
                 this.minCoreRevision), getVersionFile(), Charset.defaultCharset());
         if(!success && !silent) {
             throw new RuntimeException("Some classes of this plugin are incompatible with core");
@@ -256,6 +261,14 @@ public class CompatibilityChecker extends DefaultTask{
         } else {
             throw new RuntimeException("Accesing to non static field");
         }
+    }
+
+    private String loadStringGetter(String className, String getterName) throws ReflectiveOperationException {
+        Class<?> clazz = classLoader.loadClass(className);
+        Constructor<?> constructor = clazz.getConstructor();
+        Object instance =  constructor.newInstance();
+        Method method = clazz.getDeclaredMethod(getterName);
+        return String.valueOf(Objects.requireNonNull(method.invoke(instance), "Empty result for " + getterName));
     }
     
     @InputFile

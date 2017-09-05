@@ -5,7 +5,7 @@ apply plugin: 'eclipse'
 apply plugin: 'groovy'
 
 group = 'com.exactprosystems.testtools'
-version = '2.6-dev-SNAPSHOT'
+version = "${sailfish_version_major}.${sailfish_version_minor}-SNAPSHOT"
 archivesBaseName = 'GradlePlugin'
 
 dependencies {
@@ -13,6 +13,9 @@ dependencies {
     compile localGroovy()
 
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
+	compile group: 'org.freemarker', name: 'freemarker', version: '2.3.24-incubating'
+
+    
     compile 'commons-io:commons-io:1.4'
     compile 'com.google.guava:guava:18.0'
 }
