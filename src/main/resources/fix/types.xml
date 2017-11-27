@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <types>
-	<type qfj="UTCMICROSECONDSTIMESTAMP" dict="org.threeten.bp.LocalDateTime"/>
+	<type qfj="UTCTIMESTAMPSECONDPRECISION" dict="org.threeten.bp.LocalDateTime"/>
 	<type qfj="UTCTIMESTAMP" dict="org.threeten.bp.LocalDateTime"/>
 	<type qfj="UTCTIMEONLY" dict="org.threeten.bp.LocalTime" />
 	<type qfj="UTCDATE" dict="org.threeten.bp.LocalDateTime" />
