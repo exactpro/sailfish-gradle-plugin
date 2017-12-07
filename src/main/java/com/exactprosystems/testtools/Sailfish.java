@@ -26,16 +26,6 @@ public class Sailfish implements Plugin<Project> {
 
     @Override
     public void apply(Project target) {
-<<<<<<< HEAD
-        target.getTasks().create("generateXmlFAST", ConvertFASTTemplate.class);
-        target.getTasks().create("writeBuildInfo", BuildInfoWriter.class);
-        target.getTasks().create("writeFile", WriteFileTask.class);
-        target.getTasks().create("generateXmlFix", ConvertFixDictionary.class);
-        target.getTasks().create("checkCompatibility", CompatibilityChecker.class);
-        target.getTasks().create("validateDictionary", DictionaryValidatorPlugin.class);
-        target.getTasks().create("generateXmlQuicfixj", ConvertSailfishDictionaryToQuickfixj.class);
-        target.getTasks().create("collectDependencies", DependencyCollector.class);
-=======
         List<DefaultTask> list = new ArrayList<>();
         list.add(target.getTasks().create("generateXmlFAST", ConvertFASTTemplate.class));
         list.add(target.getTasks().create("writeBuildInfo", BuildInfoWriter.class));
@@ -44,11 +34,11 @@ public class Sailfish implements Plugin<Project> {
         list.add(target.getTasks().create("checkCompatibility", CompatibilityChecker.class));
         list.add(target.getTasks().create("validateDictionary", DictionaryValidatorPlugin.class));
         list.add(target.getTasks().create("generateVersionClass", GenerateVersionClass.class));
+        list.add(target.getTasks().create("generateXmlQuicfixj", ConvertSailfishDictionaryToQuickfixj.class));
         list.add(target.getTasks().create("collectDependencies", DependencyCollector.class));
         
         for (DefaultTask defaultTask : list) {
             defaultTask.setGroup("Sailfish");
         }
->>>>>>> origin/release-2.7-dev
     }
 }
