@@ -78,7 +78,16 @@
 				</xsl:otherwise>
 			</xsl:choose>
 			<dict:attribute name="MessageType" type="java.lang.String">
-				<xsl:value-of select="./fast:string[@name='MessageType']/fast:constant/@value"/>
+				<xsl:choose>
+					<xsl:when test="count(./fast:string[string(@name)='MessageType']) != 0">
+						<xsl:value-of select="./fast:string[@name='MessageType']/fast:constant/@value"/>
+					</xsl:when>
+					<xsl:otherwise>
+						<xsl:variable name="ref" select="concat(@name,'Header')"/>
+						<xsl:variable name="type-name" select="./fast:templateRef[@name = $ref]/@name"/>
+						<xsl:value-of select="../fast:template[@name = $type-name]/fast:string[@name='MessageType']/fast:constant/@value"/>
+					</xsl:otherwise>
+				</xsl:choose>
 			</dict:attribute>
 			<dict:attribute name="name" type="java.lang.String">
 				<xsl:value-of select="@name" />

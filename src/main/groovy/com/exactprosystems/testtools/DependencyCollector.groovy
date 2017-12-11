@@ -23,6 +23,7 @@ import java.util.jar.JarFile
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.artifacts.Configuration.State
 
 class DependencyCollector extends DefaultTask {
     @Input
@@ -73,8 +74,10 @@ class DependencyCollector extends DefaultTask {
                     jarFiles.addAll(configuration.files(dependency).grep {
                         it.name.endsWith('jar') || it.name.endsWith('zip')
                     })
-                } catch(Exception e) {
-                    unresolvedDependencies = true
+                } catch (Exception e) {
+                    if (configuration.getState() != State.UNRESOLVED) {
+                        unresolvedDependencies = true
+                    }
                 }
             }
         }

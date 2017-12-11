@@ -34,6 +34,7 @@ public class Sailfish implements Plugin<Project> {
         list.add(target.getTasks().create("checkCompatibility", CompatibilityChecker.class));
         list.add(target.getTasks().create("validateDictionary", DictionaryValidatorPlugin.class));
         list.add(target.getTasks().create("generateVersionClass", GenerateVersionClass.class));
+        list.add(target.getTasks().create("generateXmlQuicfixj", ConvertSailfishDictionaryToQuickfixj.class));
         list.add(target.getTasks().create("collectDependencies", DependencyCollector.class));
         
         for (DefaultTask defaultTask : list) {
