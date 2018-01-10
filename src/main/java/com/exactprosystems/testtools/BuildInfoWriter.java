@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2017 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import java.util.TreeMap;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
+import java.util.zip.ZipException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.gradle.api.DefaultTask;
@@ -78,6 +79,8 @@ public class BuildInfoWriter extends DefaultTask {
                         buildInfoMap.put(buildName, revision + "/" + gitHash);
                     }
                 }
+            } catch (ZipException ze) {
+                getLogger().debug("{} File {} is not jar", ze.getMessage(), file);
             }
         }
 
