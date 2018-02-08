@@ -40,6 +40,7 @@
 	<type qfj="MULTIPLECHARVALUE" dict="java.lang.String" />
 	<type qfj="MONTH-YEAR" dict="java.lang.String" />
 	<type qfj="DAY-OF-MONTH" dict="java.lang.String" />
-	
+	<type qfj="XMLDATA" dict="java.lang.String"/>
+	<type qfj="LANGUAGE" dict="java.lang.String"/>
 	
 </types>
