@@ -24,8 +24,8 @@ ext {
     sharedDir = file("${project.rootDir}/shared")
 }
 
-sourceCompatibility = 1.7 //Java version compatibility to use when compiling Java source.
-targetCompatibility = 1.7 //Java version to generate classes for.
+sourceCompatibility = 1.8 //Java version compatibility to use when compiling Java source.
+targetCompatibility = 1.8 //Java version to generate classes for.
 
 sourceSets {
     main {
@@ -66,7 +66,8 @@ buildscript { // artifacrory plugin
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '3.3'
+    gradleVersion = '4.4'
+    distributionType = 'all'
 }
 
 repositories {
