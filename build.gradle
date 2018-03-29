@@ -55,7 +55,7 @@ buildscript { // artifacrory plugin
         } else {
             maven { // for gradle fast plugin
                 name 'Artifactory'
-                url 'http://arti.exactpro.com/libs-release'
+                url 'http://artifactory5.exp.exactpro.com/artifactory/libs-release'
             }
         }
     }
@@ -90,7 +90,7 @@ repositories {
     } else {
         maven { // for gradle fast plugin
             name 'Artifactory'
-            url 'http://arti.exactpro.com/libs-snapshot'
+            url 'http://artifactory5.exp.exactpro.com/artifactory/libs-snapshot'
         }
     }
 }
