@@ -11,3 +11,6 @@ RemoteSystemsTempFiles
 build
 shared
 bin
+
+#idea
+.idea
