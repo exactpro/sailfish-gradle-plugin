@@ -396,8 +396,10 @@
 			<xsl:call-template name="indent">
 				<xsl:with-param name="size" select="3"/>
 			</xsl:call-template>
-			
-			<dict:attribute name="tag" type="java.lang.Integer"><xsl:value-of select="string(/*/fields/field[@name=$clgrpname]/@number)" /></dict:attribute>
+
+            <dict:attribute name="tag" type="java.lang.Integer">
+                <xsl:value-of select="string((/*/fields | $sessDict/fix/fields)/field[@name=$clgrpname]/@number)"/>
+            </dict:attribute>
 
 			<xsl:call-template name="indent">
 				<xsl:with-param name="size" select="3"/>
