@@ -35,22 +35,22 @@ public class ${className} extends AbstractVersion {
 
     @Override
     public int getMajor() {
-        return ${getValue(major, "MAJOR")?c};
+        return ${getValue(major?c, "MAJOR")};
     }
 
     @Override
     public int getMinor() {
-        return ${getValue(minor, "MINOR")?c};
+        return ${getValue(minor?c, "MINOR")};
     }
 
     @Override
     public int getMaintenance() {
-        return ${getValue(maintenance, "MAINTENANCE")?c};
+        return ${getValue(maintenance?c, "MAINTENANCE")};
     }
 
     @Override
     public int getBuild() {
-        return ${getValue(build, "BUILD")?c};
+        return ${getValue(build?c, "BUILD")};
     }
 
     @Override
