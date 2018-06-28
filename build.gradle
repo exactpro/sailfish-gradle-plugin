@@ -95,6 +95,16 @@ repositories {
     }
 }
 
+task zipFixTypes(type: Zip) {
+    from ('src/main/resources/fix/')
+    include('types.xml')
+    classifier = 'fixtypes'
+}
+
+artifacts {
+    archives zipFixTypes
+}
+
 artifactory {
     publish {
         defaults {
