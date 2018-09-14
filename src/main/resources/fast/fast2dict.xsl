@@ -26,6 +26,8 @@
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:param>
+
+	<xsl:param name="template"/>
 	
 	<xsl:template match="/">
 		<xsl:comment>
@@ -37,6 +39,7 @@
 
 	<xsl:template match="fast:templates">
 		<dict:dictionary name="{$namespace}">
+            <dict:attribute type="java.lang.String" name="Template"><xsl:value-of select="string($template)"/> </dict:attribute>
 			<dict:fields />
 			<dict:messages>
 				<xsl:apply-templates mode="rootCreated" select="./fast:template[@id]" />

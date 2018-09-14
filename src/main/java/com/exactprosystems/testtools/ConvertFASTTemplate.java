@@ -70,6 +70,11 @@ public class ConvertFASTTemplate extends DefaultTask {
                 xsltParams.put("destdir", outputFolderPath);
                 xsltParams.put("force", true);
 
+                final Map<String, Object> sourceParam = new HashMap<String, Object>() {{
+                    put("name", "template");
+                    put("expression", file.getName());
+                }};
+
                 ant.invokeMethod("xslt", new Object[]{xsltParams, new Closure<Object>(this, this) {
 
                     public void doCall(Object ignore) {
@@ -83,6 +88,8 @@ public class ConvertFASTTemplate extends DefaultTask {
                                 ant.invokeMethod("string", xsltContentParam);
                             }
                         }});
+
+                        ant.invokeMethod("param", sourceParam);
                     }
                 }});
             }
