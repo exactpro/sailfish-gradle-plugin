@@ -164,7 +164,7 @@
 			<xsl:with-param name="size" select="3"/>
 		</xsl:call-template>
 
-		<dict:value name="{translate(@description,'()_,/ ','______')}"><xsl:value-of select="@enum" /></dict:value>
+		<dict:value name="{translate(@description,'()_,.-/ ','________')}"><xsl:value-of select="@enum" /></dict:value>
 	</xsl:template>
 	
 	<xsl:template match="components/component" mode="messages">
