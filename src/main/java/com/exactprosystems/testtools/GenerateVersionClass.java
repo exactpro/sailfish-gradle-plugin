@@ -70,6 +70,7 @@ public class GenerateVersionClass extends DefaultTask {
     private String alias = "impl";
     private String branch = "master";
     private String revision = "std";
+    private String artifactName = "none";
 
     public GenerateVersionClass() throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException {
         Configuration configuration = new Configuration(Configuration.VERSION_2_3_24);
@@ -272,6 +273,14 @@ public class GenerateVersionClass extends DefaultTask {
         this.branch = requireNonBlank(branch, "Branch");
     }
 
+    public String getArtifactName() {
+        return artifactName;
+    }
+
+    public void setArtifactName(String artifactName) {
+        this.artifactName = requireNonBlank(artifactName, "Artifact name");
+    }
+
     @OutputFiles
     public List<File> getOutputFiles() {
         List<File> result = new ArrayList<>();
@@ -327,6 +336,7 @@ public class GenerateVersionClass extends DefaultTask {
         data.put("build", this.build);
         data.put("alias", this.alias);
         data.put("branch", this.branch);
+        data.put("artifactName", this.artifactName);
         
         try (OutputStream stream = new FileOutputStream(outputFile);
                 Writer writer = new OutputStreamWriter(stream)) {

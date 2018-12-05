@@ -4,6 +4,7 @@
 <#assign formattedAlias = isPlugin?then('"${alias}"', "GENERAL")>
 <#assign formattedBranch = '"${branch!"master"}"'>
 <#assign formattedRevision = '"${revision!"std"}"'>
+<#assign formattedArtifactName = '"${artifactName!"none"}"'>
 /******************************************************************************
  * Copyright 2009-${.now?string('yyyy')} Exactpro (Exactpro Systems Limited)
  *
@@ -30,6 +31,7 @@ public class ${className} extends AbstractVersion {
     public static final int BUILD = ${build};
     public static final String ALIAS = ${formattedAlias};
     public static final String BRANCH = ${formattedBranch};
+    public static final String ARTIFACT_NAME = ${formattedArtifactName};
 	</#if>
 	
 
@@ -61,6 +63,11 @@ public class ${className} extends AbstractVersion {
     @Override
     public String getBranch() {
         return ${getValue(formattedBranch, "BRANCH")};
+    }
+
+    @Override
+    public String getArtifactName() {
+        return ${getValue(formattedArtifactName, "ARTIFACT_NAME")};
     }
     <#if isPlugin>
     
