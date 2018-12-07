@@ -39,6 +39,7 @@ public class ConvertFASTTemplate extends DefaultTask {
     private String xslPath = "fast/fast2dict.xsl";
     private String inputFolderPath = "";
     private String outputFolderPath = "";
+    private boolean includeTemplateName = false;
 
     @TaskAction
     public void generateXmlFAST() throws TaskExecutionException, IOException {
@@ -89,7 +90,9 @@ public class ConvertFASTTemplate extends DefaultTask {
                             }
                         }});
 
-                        ant.invokeMethod("param", sourceParam);
+                        if (includeTemplateName) {
+                            ant.invokeMethod("param", sourceParam);
+                        }
                     }
                 }});
             }
@@ -129,5 +132,17 @@ public class ConvertFASTTemplate extends DefaultTask {
     @InputDirectory
     public File getInputFolder() {
         return new File(this.inputFolderPath);
+    }
+
+    public boolean isIncludeTemplateName() {
+        return includeTemplateName;
+    }
+
+    /**
+     * Append attribute with template name to dictionary. By default, attribute doesn't append
+     * @param includeTemplateName
+     */
+    public void setIncludeTemplateName(boolean includeTemplateName) {
+        this.includeTemplateName = includeTemplateName;
     }
 }

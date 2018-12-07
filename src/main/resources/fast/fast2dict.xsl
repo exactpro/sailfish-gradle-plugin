@@ -39,7 +39,9 @@
 
 	<xsl:template match="fast:templates">
 		<dict:dictionary name="{$namespace}">
-            <dict:attribute type="java.lang.String" name="Template"><xsl:value-of select="string($template)"/> </dict:attribute>
+            <xsl:if test="string($template) != ''">
+                <dict:attribute type="java.lang.String" name="Template"><xsl:value-of select="string($template)"/> </dict:attribute>
+            </xsl:if>
 			<dict:fields />
 			<dict:messages>
 				<xsl:apply-templates mode="rootCreated" select="./fast:template[@id]" />
