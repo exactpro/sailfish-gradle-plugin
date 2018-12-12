@@ -4,7 +4,7 @@ apply plugin: 'maven'
 apply plugin: 'eclipse'
 apply plugin: 'groovy'
 
-group = 'com.exactprosystems.testtools'
+group = 'com.exactpro.sf'
 version = "${sailfish_version_major}.${sailfish_version_minor}-SNAPSHOT"
 archivesBaseName = 'gradle-plugin'
 

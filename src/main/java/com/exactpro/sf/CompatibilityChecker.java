@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.exactprosystems.testtools;
+package com.exactpro.sf;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -53,7 +53,7 @@ import com.google.common.io.Files;
 
 public class CompatibilityChecker extends DefaultTask{
     
-    private final static String BASE_CLASSPATH = "com.exactprosystems.testtools.";
+    private final static String BASE_CLASSPATH = "com.exactpro.sf.";
     private final static String PLUGIN_LOADER = BASE_CLASSPATH + "center.impl.PluginLoader";
     private final static String I_SERVICE = BASE_CLASSPATH + "services.IService";
     private final static String I_UTILITY_CALLER = BASE_CLASSPATH + "scriptrunner.utilitymanager.IUtilityCaller";

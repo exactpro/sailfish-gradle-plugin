@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.exactprosystems.testtools;
+package com.exactpro.sf;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -54,11 +54,11 @@ public class GenerateVersionClass extends DefaultTask {
     
     private static final Logger logger = LoggerFactory.getLogger(GenerateVersionClass.class);
     
-    private static final String SERVICE_LOADER_FILE = "com.exactprosystems.testtools.center.IVersion";
+    private static final String SERVICE_LOADER_FILE = "com.exactpro.sf.center.IVersion";
     
     private final Template template;
 
-    private String packageName = "com.exactprosystems.testtools.center.impl";
+    private String packageName = "com.exactpro.sf.center.impl";
     private File outputJavaDir = new File("src/gen/java");
     private File outputResourceDir = new File("src/gen/resources");
     private boolean isPlugin = false;

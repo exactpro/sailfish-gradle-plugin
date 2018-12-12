@@ -12,7 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/package com.exactprosystems.testtools;
+ ******************************************************************************/
+package com.exactpro.sf;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -137,7 +138,7 @@ public class DictionaryValidatorPlugin extends DefaultTask {
             @SuppressWarnings({ "unused" })
             void doCall() {
                 setProperty("classpath", classpath);
-                setProperty("main", "com.exactprosystems.testtools.util.DictionaryValidator");
+                setProperty("main", "com.exactpro.sf.util.DictionaryValidator");
                 List<Object> args = new ArrayList<>(dictionary.size() + 1);
                 args.add(validator);
                 args.addAll(dictionary);

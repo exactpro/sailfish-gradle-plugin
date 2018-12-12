@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.exactprosystems.testtools
+package com.exactpro.sf
 
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
@@ -68,7 +68,7 @@ class DependencyCollector extends DefaultTask {
 
         project.configurations.each { configuration ->
             configuration.allDependencies.grep {
-                it.group == 'com.exactprosystems.testtools'
+                it.group == 'com.exactpro.sf'
             }.each { dependency ->
                 try {
                     jarFiles.addAll(configuration.files(dependency).grep {
