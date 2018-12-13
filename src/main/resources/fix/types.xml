@@ -17,13 +17,13 @@
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 -->
 <types>
-	<type qfj="UTCTIMESTAMPSECONDPRECISION" dict="org.threeten.bp.LocalDateTime"/>
-	<type qfj="UTCTIMESTAMP" dict="org.threeten.bp.LocalDateTime"/>
-	<type qfj="UTCTIMEONLY" dict="org.threeten.bp.LocalTime" />
-	<type qfj="UTCDATE" dict="org.threeten.bp.LocalDateTime" />
-	<type qfj="UTCDATEONLY" dict="org.threeten.bp.LocalDate" />
-	<type qfj="TIME" dict="org.threeten.bp.LocalDateTime" />
-	<type qfj="DATE" dict="org.threeten.bp.LocalDateTime" />
+	<type qfj="UTCTIMESTAMPSECONDPRECISION" dict="java.time.LocalDateTime"/>
+	<type qfj="UTCTIMESTAMP" dict="java.time.LocalDateTime"/>
+	<type qfj="UTCTIMEONLY" dict="java.time.LocalTime" />
+	<type qfj="UTCDATE" dict="java.time.LocalDateTime" />
+	<type qfj="UTCDATEONLY" dict="java.time.LocalDate" />
+	<type qfj="TIME" dict="java.time.LocalDateTime" />
+	<type qfj="DATE" dict="java.time.LocalDateTime" />
 	<type qfj="DAYOFMONTH" dict="java.lang.Integer" />
 	
 	<type qfj="STRING" dict="java.lang.String" />
