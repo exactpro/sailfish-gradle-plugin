@@ -6,7 +6,7 @@ apply plugin: 'groovy'
 
 group = 'com.exactpro.sf'
 version = "${sailfish_version_major}.${sailfish_version_minor}-SNAPSHOT"
-archivesBaseName = 'saifish-gradle-plugin'
+archivesBaseName = 'sailfish-gradle-plugin'
 
 dependencies {
     compile gradleApi()
