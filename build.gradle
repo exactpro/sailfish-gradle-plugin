@@ -5,7 +5,7 @@ apply plugin: 'eclipse'
 apply plugin: 'groovy'
 
 group = 'com.exactpro.sf'
-version = "${sailfish_version_major}.${sailfish_version_minor}-SNAPSHOT"
+version = "${sailfish_version_major}.${sailfish_version_minor}"
 archivesBaseName = 'sailfish-gradle-plugin'
 
 dependencies {
@@ -40,24 +40,7 @@ sourceSets {
 
 buildscript { // artifacrory plugin
     repositories {
-        if (project.hasProperty('repository')) {
-            maven {
-                name 'UserRepository'
-                url project.repository
-                if (project.hasProperty('repositoryAccount') && project.hasProperty('repositoryPassword')) {
-                    credentials {
-                        username project.repositoryAccount
-                        password project.repositoryPassword
-                    }
-                }
-            }
-            jcenter()
-        } else {
-            maven { // for gradle fast plugin
-                name 'Artifactory'
-                url 'http://artifactory5.exp.exactpro.com/artifactory/libs-release'
-            }
-        }
+        jcenter()
     }
     dependencies {
         classpath(group: 'org.jfrog.buildinfo', name: 'build-info-extractor-gradle', version: '4.4.12')
@@ -75,24 +58,7 @@ repositories {
         name 'MavenLocal' // for local builds only
         url sharedDir
     }
-    if (project.hasProperty('repository')) {
-        maven {
-            name 'UserRepository'
-            url project.repository
-            if (project.hasProperty('repositoryAccount') && project.hasProperty('repositoryPassword')) {
-                credentials {
-                    username project.repositoryAccount
-                    password project.repositoryPassword
-                }
-            }
-        }
-        jcenter()
-    } else {
-        maven { // for gradle fast plugin
-            name 'Artifactory'
-            url 'http://artifactory5.exp.exactpro.com/artifactory/libs-snapshot'
-        }
-    }
+    jcenter()
 }
 
 task zipFixTypes(type: Zip) {
