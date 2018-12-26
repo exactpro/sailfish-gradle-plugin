@@ -115,7 +115,7 @@ public class GenerateVersionClass extends DefaultTask {
     }
 
     /**
-     * @param packageDir
+     * @param packageName
      *            the packageName to set
      */
     public void setPackageDir(String packageName) {
