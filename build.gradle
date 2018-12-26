@@ -5,7 +5,7 @@ apply plugin: 'eclipse'
 apply plugin: 'groovy'
 apply plugin: 'signing'
 
-group = 'com.exactpro.sf'
+group = 'com.exactpro.sailfish-gradle-plugin'
 version = "${sailfish_version_major}.${sailfish_version_minor}"
 archivesBaseName = 'sailfish-gradle-plugin'
 
