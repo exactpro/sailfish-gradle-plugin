@@ -59,8 +59,8 @@ public class GenerateVersionClass extends DefaultTask {
     private final Template template;
 
     private String packageName = "com.exactpro.sf.center.impl";
-    private File outputJavaDir = new File("src/gen/java");
-    private File outputResourceDir = new File("src/gen/resources");
+    private File outputJavaDir = Paths.get(getProject().getProjectDir().toString(), "src/gen/java").toFile();
+    private File outputResourceDir = Paths.get(getProject().getProjectDir().toString(), "src/gen/resources").toFile();
     private boolean isPlugin = false;
     private int major = 0;
     private int minor = 0;
@@ -293,11 +293,11 @@ public class GenerateVersionClass extends DefaultTask {
     }
     
     public File getClassFile() {
-        return Paths.get(getProject().getProjectDir().toString(), this.outputJavaDir.toString(), packageToPath(this.packageName), getClassName() + ".java").toFile();
+        return Paths.get(this.outputJavaDir.toString(), packageToPath(this.packageName), getClassName() + ".java").toFile();
     }
     
     public File getServiceFile() {
-        return Paths.get(getProject().getProjectDir().toString(), this.outputResourceDir.toString(), "META-INF", "services", SERVICE_LOADER_FILE).toFile();
+        return Paths.get(this.outputResourceDir.toString(), "META-INF", "services", SERVICE_LOADER_FILE).toFile();
     }
 
     private void writeServiceFile() {
