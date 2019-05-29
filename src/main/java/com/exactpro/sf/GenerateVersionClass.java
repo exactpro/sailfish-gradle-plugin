@@ -351,7 +351,7 @@ public class GenerateVersionClass extends DefaultTask {
     }
     
     private String packageToPath(String packageName) {
-        return packageName.replaceAll("\\.", File.separator);
+        return packageName.replace('.', File.separatorChar);
     }
     
     private String requireNonBlank(String value, String field) {
