@@ -6,7 +6,7 @@ apply plugin: 'groovy'
 apply plugin: 'signing'
 
 group = 'com.exactpro.sailfish-gradle-plugin'
-version = "${sailfish_version_major}.${sailfish_version_minor}"
+version = "${sailfish_version_major}.${sailfish_version_minor}.${sailfish_version_maintenance}"
 archivesBaseName = 'sailfish-gradle-plugin'
 
 dependencies {
@@ -91,7 +91,7 @@ uploadArchives {
 
             beforeDeployment { 
                 MavenDeployment deployment -> signing.signPom(deployment) 
-            }
+                }
 
             pom.project {
                 name 'Exactpro Sailfish Gradle plugin'
