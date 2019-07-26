@@ -135,19 +135,20 @@ uploadArchives {
             } else {
                 uniqueVersion = false // publish non unique snapshots to local repository
                 repository(url: "file://${sharedDir}")
-            }
-        }
-    }
-    doLast {
-        // Remove any invalid maven-metadata.xml files that may have been created
-        // for SNAPSHOT versions that are *not* uniquely versioned.
-        pom*.each { pom ->
-            if (pom.version.endsWith('-SNAPSHOT')) {
-                final File artifactDir = new File(rootProject.ext.sharedDir,
-                        pom.groupId.replace('.', '/')
-                            + '/' + pom.artifactId
-                            + '/' + pom.version)
-                    delete fileTree(dir: artifactDir, include: 'maven-metadata.xml*')
+
+                doLast {
+                    // Remove any invalid maven-metadata.xml files that may have been created
+                    // for SNAPSHOT versions that are *not* uniquely versioned.
+                    pom*.each { pom ->
+                        if (pom.version.endsWith('-SNAPSHOT')) {
+                            final File artifactDir = new File(rootProject.ext.sharedDir,
+                                    pom.groupId.replace('.', '/')
+                                        + '/' + pom.artifactId
+                                        + '/' + pom.version)
+                                delete fileTree(dir: artifactDir, include: 'maven-metadata.xml*')
+                        }
+                    }
+                }
             }
         }
     }
@@ -166,6 +167,7 @@ task javadocJar(type: Jar, dependsOn: classes) {
 artifacts {
     archives sourcesJar, javadocJar
 }
+
 if (sonatype_publish) {
     signing {
         sign configurations.archives
