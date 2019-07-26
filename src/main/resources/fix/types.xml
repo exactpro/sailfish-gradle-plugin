@@ -44,6 +44,11 @@
 	<type qfj="LENGTH" dict="java.lang.Integer" />
 	<type qfj="COUNTRY" dict="java.lang.String" />
 	<type qfj="MULTIPLEVALUESTRING" dict="java.lang.String" />
+
+    <type qfj="TAGNUM" dict="java.lang.Long" />
+    <type qfj="XIDREF" dict="java.lang.String" />
+    <type qfj="LOCALMKTTIME" dict="java.lang.String" />
+    <type qfj="XID" dict="java.lang.String" />
 	
 	
 	
