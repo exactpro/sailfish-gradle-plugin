@@ -27,7 +27,7 @@ import org.gradle.api.tasks.TaskAction
 class OrchestraToSailfishConverter extends DefaultTask {
 
     @InputFile
-    File orchestraXml
+    URI orchestraXml
     @OutputDirectory
     File outputDirectory
     @Input
@@ -41,7 +41,7 @@ class OrchestraToSailfishConverter extends DefaultTask {
 
         def orchestraTarget = new File(project.buildDir, 'orchestrafiles')
 
-        orchestraXml.withInputStream { stream ->
+        orchestraXml.toURL().withInputStream { stream ->
             try {
                 generator.generate(stream, orchestraTarget)
             } catch (e) {

@@ -36,6 +36,7 @@ public class Sailfish implements Plugin<Project> {
         list.add(target.getTasks().create("generateVersionClass", GenerateVersionClass.class));
         list.add(target.getTasks().create("generateXmlQuicfixj", ConvertSailfishDictionaryToQuickfixj.class));
         list.add(target.getTasks().create("collectDependencies", DependencyCollector.class));
+        list.add(target.getTasks().create("convertFixOrchestraToSailfishDictionary", OrchestraToSailfishConverter.class));
         
         for (DefaultTask defaultTask : list) {
             defaultTask.setGroup("Sailfish");
