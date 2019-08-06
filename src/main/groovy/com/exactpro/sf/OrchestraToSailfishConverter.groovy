@@ -20,13 +20,12 @@ import org.apache.commons.io.FileUtils
 import org.apache.commons.io.IOUtils
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 
 class OrchestraToSailfishConverter extends DefaultTask {
 
-    @InputFile
+    @Input
     URI orchestraXml
     @OutputDirectory
     File outputDirectory
