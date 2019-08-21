@@ -20,6 +20,7 @@ import org.apache.commons.io.FileUtils
 import org.apache.commons.io.IOUtils
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 
@@ -27,6 +28,9 @@ class OrchestraToSailfishConverter extends DefaultTask {
 
     @Input
     URI orchestraXml
+    @Input
+    @Optional
+    URI fixtXml
     @OutputDirectory
     File outputDirectory
     @Input
@@ -44,12 +48,21 @@ class OrchestraToSailfishConverter extends DefaultTask {
             try {
                 generator.generate(stream, orchestraTarget)
             } catch (e) {
-                e.printStackTrace()
+                println 'Cant convert orchestra file to quickfixj file'
+                throw e
+            }
+        }
+
+        if (fixtXml) {
+            fixtXml.toURL().withInputStream { stream ->
+                def fixtFile = new File(orchestraTarget, 'FIXT11.xml')
+                fixtFile << stream
+                println "$fixtFile will be used"
             }
         }
 
         def fixDictionary = new FileNameFinder().getFileNames(orchestraTarget.absolutePath, 'FIX*.xml').first()
-        println fixDictionary
+        println "$fixDictionary will be used"
 
         convert(orchestraTarget, outputDirectory, fileSuffix)
 
@@ -84,6 +97,8 @@ class OrchestraToSailfishConverter extends DefaultTask {
 
         def mapperArgs = ["type": "glob", "from": "*.xml", "to": "*.${fileSuffix}.xml"]
         def prefixParamArgs = ["name": "nsprefix", "expression": fileSuffix + "_"]
+        def sessionDictionary = new File(inputDirectory, "FIXT11.xml")
+        def sessionDictionaryArgs = sessionDictionary.exists() ? ["name": "sessionDictionary", "expression": sessionDictionary.getAbsolutePath()] : [:]
 
         dictionaries.each { File dictionary ->
 
@@ -96,6 +111,9 @@ class OrchestraToSailfishConverter extends DefaultTask {
             ant.xslt(xsltArgs) {
                 mapper(mapperArgs)
                 param(prefixParamArgs)
+                if (sessionDictionaryArgs) {
+                    param(sessionDictionaryArgs)
+                }
             }
         }
     }
