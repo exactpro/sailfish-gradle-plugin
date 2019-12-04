@@ -170,7 +170,7 @@
 	</xsl:template>
 	
 	<xsl:template match="fast:group">
-		<dict:field xsi:type="Message">
+		<dict:field>
 			<xsl:attribute name="reference" separator="_">
 				<xsl:for-each select="ancestor::*[@name]/@name" >
 					<xsl:value-of select="translate(string(.), ' -_', '')"/>
@@ -184,7 +184,7 @@
 
 	<xsl:template match="fast:sequence">
 		<!-- {translate(@name, ' -_', '')} -->
-		<dict:field isCollection="true" xsi:type="Message">
+		<dict:field isCollection="true">
 			<xsl:attribute name="reference" separator="_">
 				<xsl:for-each select="ancestor::*[@name]/@name" >
 					<xsl:value-of select="translate(string(.), ' -_', '')"/>
