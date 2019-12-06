@@ -42,7 +42,9 @@
             <xsl:if test="string($template) != ''">
                 <dict:attribute type="java.lang.String" name="Template"><xsl:value-of select="string($template)"/> </dict:attribute>
             </xsl:if>
-			<dict:fields />
+			<dict:fields>
+				<xsl:apply-templates mode="enum" select="//fast:enum"/>
+			</dict:fields>
 			<dict:messages>
 				<xsl:apply-templates mode="rootCreated" select="./fast:template[@id]" />
 				<xsl:apply-templates select="//fast:sequence|//fast:group"
@@ -53,7 +55,9 @@
 
 	<xsl:template match="fast:template">
 		<dict:dictionary name="{$namespace}">
-			<dict:fields />
+			<dict:fields>
+				<xsl:apply-templates mode="enum" select="//fast:enum"/>
+			</dict:fields>
 			<dict:messages>
 				<xsl:apply-templates select="." mode="rootCreated" />
 				<xsl:apply-templates select="//fast:sequence|//fast:group"
@@ -168,7 +172,76 @@
 			<xsl:call-template name="processAttributes"/>
 		</dict:field>
 	</xsl:template>
-	
+
+	<!--types for FAST v.1.2-->
+	<xsl:template match="fast:timestamp">
+		<dict:field type="java.time.LocalDateTime">
+			<xsl:call-template name="processAttributes"/>
+			<dict:attribute type="java.lang.String" name="unit">
+				<xsl:value-of select="@unit"/>
+			</dict:attribute>
+		</dict:field>
+	</xsl:template>
+
+	<xsl:template match="fast:boolean">
+		<dict:field type="java.lang.Boolean">
+			<xsl:call-template name="processAttributes"/>
+		</dict:field>
+	</xsl:template>
+
+	<xsl:template match="fast:enum">
+		<dict:field>
+			<xsl:attribute name="reference" separator="_">
+				<xsl:for-each select="ancestor::*[@name]/@name">
+					<xsl:value-of select="translate(string(.), ' -_', '')"/>
+					<xsl:value-of select="'_'"/>
+				</xsl:for-each>
+				<xsl:value-of select="translate(string(@name), ' -_', '')"/>
+			</xsl:attribute>
+			<xsl:call-template name="processAttributes"/>
+		</dict:field>
+	</xsl:template>
+
+	<xsl:template match="fast:enum" mode="enum">
+		<dict:field type="java.lang.Long">
+			<xsl:attribute name="id" separator="_">
+				<xsl:for-each select="ancestor::*[@name]/@name">
+					<xsl:value-of select="translate(string(.), ' -_', '')"/>
+					<xsl:value-of select="'_'"/>
+				</xsl:for-each>
+				<xsl:value-of select="translate(string(@name), ' -_', '')"/>
+			</xsl:attribute>
+			<xsl:attribute name="name" separator="_">
+				<xsl:for-each select="ancestor::*[@name]/@name">
+					<xsl:value-of select="translate(string(.), ' -_', '')"/>
+					<xsl:value-of select="'_'"/>
+				</xsl:for-each>
+				<xsl:value-of select="translate(string(@name), ' -_', '')"/>
+			</xsl:attribute>
+			<xsl:apply-templates mode="enum_values"/>
+		</dict:field>
+	</xsl:template>
+
+	<xsl:template match="fast:element" mode="enum_values">
+		<xsl:variable name="enumname">
+			<xsl:choose>
+				<xsl:when test="number(@name) = @name">
+					<xsl:value-of select="concat('value', @name)"/>
+				</xsl:when>
+				<xsl:otherwise>
+					<xsl:value-of select="@name"/>
+				</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
+		<dict:value name="{$enumname}">
+			<xsl:variable name="n">
+				<xsl:number from="element"/>
+			</xsl:variable>
+			<xsl:value-of select="$n - 1"/>
+		</dict:value>
+	</xsl:template>
+	<!--types for FAST v.1.2-->
+
 	<xsl:template match="fast:group">
 		<dict:field>
 			<xsl:attribute name="reference" separator="_">
