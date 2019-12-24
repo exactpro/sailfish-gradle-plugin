@@ -29,8 +29,10 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -40,6 +42,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 
+import com.google.common.collect.Multimap;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
@@ -86,7 +89,6 @@ public class CompatibilityChecker extends DefaultTask{
 
     @TaskAction
     public void checkCompatibility() throws Exception {
-        
         Project p = getProject();
         List<URL> urls = new ArrayList<>();
         Configuration configuration = p.getConfigurations().getByName(JavaPlugin.RUNTIME_CONFIGURATION_NAME); 
@@ -135,12 +137,15 @@ public class CompatibilityChecker extends DefaultTask{
 
         try {
             Object root = unmarshal(actionsFile, classLoader.loadClass(ACTIONS)).getValue();
-            Set<String> utilityClasses = new HashSet<String>();
+
             boolean valid = true;
+
+            Set<Class<?>> listUtilityClass = new HashSet<>();
 
             for(Object action : (Iterable<?>)root.getClass().getMethod("getAction").invoke(root)) {
                 Object classNameInstance = action.getClass().getMethod("getActionClassName").invoke(action);
                 String className = (String) classNameInstance.getClass().getMethod("getName").invoke(classNameInstance);
+
                 System.out.println("Checking action class: " + className);
 
                 try {
@@ -151,15 +156,37 @@ public class CompatibilityChecker extends DefaultTask{
                     valid = false;
                 }
 
+                CollisionsUtilityFunctions collisionsUtilityFunctions = new CollisionsUtilityFunctions(classLoader);
+
                 for(Object utility : (Iterable<?>)action.getClass().getMethod("getUtilityClassName").invoke(action)) {
-                    utilityClasses.add((String) utility.getClass().getMethod("getName").invoke(utility));
+                    String utilityClassName = (String) utility.getClass().getMethod("getName").invoke(utility);
+
+                    Class<?> utilityClass = classLoader.loadClass(utilityClassName);
+                    listUtilityClass.add(utilityClass);
+                    collisionsUtilityFunctions.put(utilityClass);
                 }
+
+                printCollisions(className, collisionsUtilityFunctions, "action ", fileName);
+
             }
 
-            return valid && checkUtilites(classLoader, utilityClasses);
+            return valid && checkUtilites(classLoader, listUtilityClass);
         } catch(JAXBException | FileNotFoundException e) {
             System.out.println("Failed to read actions file '" + fileName + "': " + e.getMessage());
             return false;
+        }
+    }
+
+    private void printCollisions(String className, CollisionsUtilityFunctions collisionsUtilityFunctions, String type, String fileName) throws ClassNotFoundException {
+        Multimap<String, Class<?>> collisions = collisionsUtilityFunctions.getCollision();
+        if (!collisions.isEmpty()) {
+            System.out.println("WARNING Collisions in " + type + className + " in file " + fileName);
+            for (Map.Entry<String, Collection<Class<?>>> collision : collisions.asMap().entrySet()) {
+                System.out.println("    Method \"" + collision.getKey() + "\" have collision in classes:");
+                for (Class<?> collisionClassName : collision.getValue()) {
+                    System.out.println("        - " + collisionClassName.getName());
+                }
+            }
         }
     }
 
@@ -170,11 +197,12 @@ public class CompatibilityChecker extends DefaultTask{
         System.out.println("Reading dictionaries file: " + fileName);
         try {
             Object root = unmarshal(dictionariesFile, classLoader.loadClass(DICTIONARIES)).getValue();
-            Set<String> utilityClasses = new HashSet<String>();
+            Set<Class<?>> listUtilityClass = new HashSet<>();
 
             boolean dictionariesOk = true;
             for (Object dictionary : (Iterable<?>) root.getClass().getMethod("getDictionary").invoke(root)) {
                 String resourcePath = (String) dictionary.getClass().getMethod("getResource").invoke(dictionary);
+
                 boolean resourseFound = false;
                 for (File cfgDir : cfgDirs) {
                     File resource = new File(cfgDir.getPath() + File.separator + "dictionaries" + File.separator + resourcePath);
@@ -187,16 +215,26 @@ public class CompatibilityChecker extends DefaultTask{
                     System.err.println(resourcePath + "doesn't exist in the plugin");
                     dictionariesOk = false;
                 }
-                
+
+                CollisionsUtilityFunctions collisionsUtilityFunctions = new CollisionsUtilityFunctions(classLoader);
+
                 for (Object className : (Iterable<?>) dictionary.getClass().getMethod("getUtilityClassName").invoke(dictionary)) {
-                    utilityClasses.add((String) className);
+
+                    Class<?> utilityClass = classLoader.loadClass((String) className);
+                    listUtilityClass.add(utilityClass);
+                    collisionsUtilityFunctions.put(utilityClass);
                 }
+
+                printCollisions(resourcePath, collisionsUtilityFunctions, "dictionary ", fileName);
+
             }
-            return checkUtilites(classLoader, utilityClasses) & dictionariesOk;
+
+            return checkUtilites(classLoader, listUtilityClass) & dictionariesOk;
         } catch (JAXBException | IOException e) {
             System.out.println("Failed to read dictionaries file '" + fileName + "': " + e.getMessage());
             return false;
         }
+
     }
 
     private boolean checkServices(ClassLoader classLoader, File servicesFile) throws ClassNotFoundException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
@@ -227,17 +265,16 @@ public class CompatibilityChecker extends DefaultTask{
         }
     }
 
-    private boolean checkUtilites(ClassLoader classLoader, Set<String> utilityClasses) {
+    private boolean checkUtilites(ClassLoader classLoader, Set<Class<?>> utilityClasses) {
         boolean valid = true;
 
-        for(String className : utilityClasses) {
-            System.out.println("Checking utility class: " + className);
+        for(Class<?> utilityClass : utilityClasses) {
+            System.out.println("Checking utility class: " + utilityClass.getName());
 
             try {
-                Class<?> utilityClass = classLoader.loadClass(className);
                 utilityClass.asSubclass(classLoader.loadClass(I_UTILITY_CALLER)).newInstance();
             } catch(ClassNotFoundException | InstantiationException | IllegalAccessException | ClassCastException e) {
-                System.out.println("Failed to load utility class '" + className + "': " + e.getMessage());
+                System.out.println("Failed to load utility class '" + utilityClass.getName() + "': " + e.getMessage());
                 valid = false;
             }
         }
