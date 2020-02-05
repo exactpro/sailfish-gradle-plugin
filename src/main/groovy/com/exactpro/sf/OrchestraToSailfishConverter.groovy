@@ -54,11 +54,8 @@ class OrchestraToSailfishConverter extends DefaultTask {
         }
 
         if (fixtXml) {
-            fixtXml.toURL().withInputStream { stream ->
-                def fixtFile = new File(orchestraTarget, 'FIXT11.xml')
-                fixtFile << stream
-                println "$fixtFile will be used"
-            }
+            def fixtFile = new File(orchestraTarget, 'FIXT11.xml').write(fixtXml.toURL().getText())
+            println "$fixtFile will be used"
         }
 
         def fixDictionary = new FileNameFinder().getFileNames(orchestraTarget.absolutePath, 'FIX*.xml').first()
