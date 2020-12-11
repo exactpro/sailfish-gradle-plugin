@@ -54,8 +54,8 @@ buildscript { // artifacrory plugin
     }
 }
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '4.4'
+wrapper {
+    gradleVersion = '6.7.1'
     distributionType = 'all'
 }
 
@@ -133,7 +133,6 @@ uploadArchives {
                     }
                 }
             } else {
-                uniqueVersion = false // publish non unique snapshots to local repository
                 repository(url: "file://${sharedDir}")
 
                 doLast {

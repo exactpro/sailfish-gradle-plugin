@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2021 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.gradle.api.AntBuilder;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
@@ -52,15 +54,14 @@ public class ConvertFASTTemplate extends DefaultTask {
 
         try(InputStream fileInputXslt = ConvertFASTTemplate.class.getClassLoader().getResourceAsStream(xslPath)) {
 
-            byte[] content = new byte[fileInputXslt.available()];
-
-            fileInputXslt.read(content);
-
-            final String xsltString = new String(content, StandardCharsets.UTF_8);
-
             FileTree dictionaries = project.fileTree(params);
 
             final AntBuilder ant = getProject().getAnt();
+
+            File tmpDir = getTemporaryDir();
+
+            File xslFile = new File(tmpDir, "fast2dict.xsl");
+            FileUtils.writeLines(xslFile, IOUtils.readLines(fileInputXslt));
 
             for (final File file : dictionaries) {
                 Map<String, Object> xsltParams = new HashMap<>();
@@ -70,6 +71,7 @@ public class ConvertFASTTemplate extends DefaultTask {
                 xsltParams.put("includes", file.getName());
                 xsltParams.put("destdir", outputFolderPath);
                 xsltParams.put("force", true);
+                xsltParams.put("style", xslFile);
 
                 final Map<String, Object> sourceParam = new HashMap<String, Object>() {{
                     put("name", "template");
@@ -79,16 +81,6 @@ public class ConvertFASTTemplate extends DefaultTask {
                 ant.invokeMethod("xslt", new Object[]{xsltParams, new Closure<Object>(this, this) {
 
                     public void doCall(Object ignore) {
-                        ant.invokeMethod("style", new Object[]{new Closure<Object>(this, this) {
-
-                            public void doCall(Object ignore) {
-                                Map<String, String> xsltContentParam = new HashMap<>();
-
-                                xsltContentParam.put("value", xsltString);
-
-                                ant.invokeMethod("string", xsltContentParam);
-                            }
-                        }});
 
                         if (includeTemplateName) {
                             ant.invokeMethod("param", sourceParam);

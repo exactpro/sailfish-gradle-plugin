@@ -91,7 +91,7 @@ public class CompatibilityChecker extends DefaultTask{
     public void checkCompatibility() throws Exception {
         Project p = getProject();
         List<URL> urls = new ArrayList<>();
-        Configuration configuration = p.getConfigurations().getByName(JavaPlugin.RUNTIME_CONFIGURATION_NAME); 
+        Configuration configuration = p.getConfigurations().getByName(JavaPlugin.RUNTIME_CONFIGURATION_NAME);
         for (File f:configuration.getFiles()) {
             urls.add(f.toURI().toURL());
         }
