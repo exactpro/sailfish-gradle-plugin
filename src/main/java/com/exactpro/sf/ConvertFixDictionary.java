@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2023 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,11 +36,8 @@ import org.gradle.api.tasks.TaskExecutionException;
 import groovy.lang.Closure;
 
 public class ConvertFixDictionary extends DefaultTask {
-    @Input
     private String fileSuffix;
-    @InputDirectory
     private File inputDirectory;
-    @OutputDirectory
     private File outputDirectory;
 
     @SuppressWarnings("serial")
@@ -123,7 +120,6 @@ public class ConvertFixDictionary extends DefaultTask {
         return fileSuffix;
     }
 
-    @Input
     public void setFileSuffix(String fileSuffix) {
         this.fileSuffix = fileSuffix;
     }
@@ -133,7 +129,6 @@ public class ConvertFixDictionary extends DefaultTask {
         return inputDirectory;
     }
 
-    @InputDirectory
     public void setInputDirectory(File inputDirectory) {
         this.inputDirectory = inputDirectory;
     }
@@ -143,7 +138,6 @@ public class ConvertFixDictionary extends DefaultTask {
         return outputDirectory;
     }
 
-    @OutputDirectory
     public void setOutputDirectory(File outputDirectory) {
         this.outputDirectory = outputDirectory;
     }

@@ -100,6 +100,7 @@ public class ConvertFASTTemplate extends DefaultTask {
         this.xslPath = xslPath;
     }
 
+    @InputDirectory
     public String getInputFolderPath() {
         return inputFolderPath;
     }
@@ -108,6 +109,7 @@ public class ConvertFASTTemplate extends DefaultTask {
         this.inputFolderPath = inputFolderPath;
     }
 
+    @OutputDirectory
     public String getOutputFolderPath() {
         return outputFolderPath;
     }
@@ -126,6 +128,7 @@ public class ConvertFASTTemplate extends DefaultTask {
         return new File(this.inputFolderPath);
     }
 
+    @Input
     public boolean isIncludeTemplateName() {
         return includeTemplateName;
     }

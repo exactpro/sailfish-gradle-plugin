@@ -35,6 +35,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleScriptException;
+import org.gradle.api.tasks.Input;
+import org.gradle.api.tasks.Internal;
+import org.gradle.api.tasks.OutputDirectory;
+import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.OutputFiles;
 import org.gradle.api.tasks.TaskAction;
 import org.slf4j.Logger;
@@ -96,6 +100,7 @@ public class GenerateVersionClass extends DefaultTask {
     /**
      * @return the isPlugin
      */
+    @Input
     public boolean isPlugin() {
         return isPlugin;
     }
@@ -110,6 +115,7 @@ public class GenerateVersionClass extends DefaultTask {
     /**
      * @return the packageName
      */
+    @Input
     public String getPackageName() {
         return packageName;
     }
@@ -125,6 +131,7 @@ public class GenerateVersionClass extends DefaultTask {
     /**
      * @return the outputDir
      */
+    @OutputDirectory
     public File getOutputJavaDir() {
         return outputJavaDir;
     }
@@ -140,6 +147,7 @@ public class GenerateVersionClass extends DefaultTask {
     /**
      * @return the outputResourceDir
      */
+    @Internal
     public File getOutputResourceDir() {
         return outputResourceDir;
     }
@@ -154,6 +162,7 @@ public class GenerateVersionClass extends DefaultTask {
     /**
      * @return the major
      */
+    @Input
     public int getMajor() {
         return major;
     }
@@ -169,6 +178,7 @@ public class GenerateVersionClass extends DefaultTask {
     /**
      * @return the minor
      */
+    @Input
     public int getMinor() {
         return minor;
     }
@@ -184,6 +194,7 @@ public class GenerateVersionClass extends DefaultTask {
     /**
      * @return the maintenance
      */
+    @Input
     public int getMaintenance() {
         return maintenance;
     }
@@ -199,6 +210,7 @@ public class GenerateVersionClass extends DefaultTask {
     /**
      * @return the minCoreRevision
      */
+    @Input
     public int getMinCoreRevision() {
         return minCoreRevision;
     }
@@ -213,6 +225,7 @@ public class GenerateVersionClass extends DefaultTask {
     /**
      * @return the build
      */
+    @Input
     public int getBuild() {
         return build;
     }
@@ -228,6 +241,7 @@ public class GenerateVersionClass extends DefaultTask {
     /**
      * @return the revision
      */
+    @Input
     public String getRevision() {
         return revision;
     }
@@ -242,6 +256,7 @@ public class GenerateVersionClass extends DefaultTask {
     /**
      * @return the alias
      */
+    @Input
     public String getAlias() {
         return alias;
     }
@@ -261,6 +276,7 @@ public class GenerateVersionClass extends DefaultTask {
     /**
      * @return the branch
      */
+    @Input
     public String getBranch() {
         return branch;
     }
@@ -273,6 +289,7 @@ public class GenerateVersionClass extends DefaultTask {
         this.branch = requireNonBlank(branch, "Branch");
     }
 
+    @Input
     public String getArtifactName() {
         return artifactName;
     }
@@ -291,11 +308,13 @@ public class GenerateVersionClass extends DefaultTask {
         logger.info("OutputFiles {}", result);
         return result;
     }
-    
+
+    @OutputFile
     public File getClassFile() {
         return Paths.get(this.outputJavaDir.toString(), packageToPath(this.packageName), getClassName() + ".java").toFile();
     }
-    
+
+    @OutputFile
     public File getServiceFile() {
         return Paths.get(this.outputResourceDir.toString(), "META-INF", "services", SERVICE_LOADER_FILE).toFile();
     }

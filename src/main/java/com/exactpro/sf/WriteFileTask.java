@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2023 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,8 @@ import java.util.List;
 
 import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleScriptException;
+import org.gradle.api.tasks.Input;
+import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
 
@@ -83,7 +85,8 @@ public class WriteFileTask extends DefaultTask {
             }
         }
     }
-    
+
+    @OutputDirectory
     public File getOutputDir() {
         return outputDir;
     }
@@ -97,6 +100,7 @@ public class WriteFileTask extends DefaultTask {
         return new File(this.outputDir, this.fileName);
     }
 
+    @Input
     public String getFileName() {
         return fileName;
     }

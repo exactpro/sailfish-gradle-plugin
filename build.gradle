@@ -1,6 +1,7 @@
 apply plugin: 'java'
+apply plugin: 'java-library'
 apply plugin: 'com.jfrog.artifactory'
-apply plugin: 'maven'
+apply plugin: 'maven-publish'
 apply plugin: 'eclipse'
 apply plugin: 'groovy'
 
@@ -18,20 +19,24 @@ version = "${sailfish_version_major}.${sailfish_version_minor}.${sailfish_versio
 archivesBaseName = 'sailfish-gradle-plugin'
 
 dependencies {
-    compile gradleApi()
-    compile localGroovy()
+    implementation gradleApi()
+    implementation localGroovy()
 
-    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
-	compile group: 'org.freemarker', name: 'freemarker', version: '2.3.24-incubating'
+    if(JavaVersion.current() >= JavaVersion.VERSION_11) {
+        implementation 'javax.xml.bind:jaxb-api:2.3.0'
+    }
 
-    compile group: 'io.fixprotocol.orchestra', name: 'repository-quickfix', version: '1.5.0'
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
+    api group: 'org.freemarker', name: 'freemarker', version: '2.3.24-incubating'
 
-    compile 'commons-io:commons-io:1.4'
-    compile 'com.google.guava:guava:18.0'
+    implementation group: 'io.fixprotocol.orchestra', name: 'repository-quickfix', version: '1.5.0'
+
+    implementation 'commons-io:commons-io:1.4'
+    implementation 'com.google.guava:guava:18.0'
 }
 
-sourceCompatibility = 1.8 //Java version compatibility to use when compiling Java source.
-targetCompatibility = 1.8 //Java version to generate classes for.
+sourceCompatibility = JavaVersion.VERSION_11 //Java version compatibility to use when compiling Java source.
+targetCompatibility = JavaVersion.VERSION_11 //Java version to generate classes for.
 
 sourceSets {
     main {
@@ -55,8 +60,8 @@ buildscript { // artifacrory plugin
 }
 
 wrapper {
-    gradleVersion = '6.7.1'
-    distributionType = 'all'
+    gradleVersion = '7.6.3'
+    distributionType = 'bin'
 }
 
 repositories {
@@ -88,26 +93,20 @@ artifactory {
     }
 }
 
-uploadArchives {
-    repositories {
-        mavenDeployer {
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
             if (sonatype_publish) {
-                beforeDeployment { 
-                    MavenDeployment deployment -> signing.signPom(deployment) 
-                }
-
-                repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2") {
-                    authentication(userName: ossrhUsername, password: ossrhPassword)
-                }
-
-                snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots") {
-                    authentication(userName: ossrhUsername, password: ossrhPassword)
+                beforeDeployment {
+                    signing {
+                        sign deployment
+                    }
                 }
 
                 pom.project {
                     name 'Exactpro Sailfish Gradle plugin'
                     packaging 'jar'
-                    // optionally artifactId can be defined here 
+                    // optionally artifactId can be defined here
                     description 'Gradle toolset for Sailfish build. Sailfish is Test automation solution we\'re releasing to open source.'
                     url 'https://github.com/Exactpro/sailfish-gradle-plugin'
 
@@ -133,21 +132,41 @@ uploadArchives {
                     }
                 }
             } else {
-                repository(url: "file://${sharedDir}")
-
-                doLast {
-                    // Remove any invalid maven-metadata.xml files that may have been created
-                    // for SNAPSHOT versions that are *not* uniquely versioned.
-                    pom*.each { pom ->
-                        if (pom.version.endsWith('-SNAPSHOT')) {
-                            final File artifactDir = new File(rootProject.ext.sharedDir,
-                                    pom.groupId.replace('.', '/')
+                // Remove any invalid maven-metadata.xml files that may have been created
+                // for SNAPSHOT versions that are *not* uniquely versioned.
+                pom {
+                    if (version.endsWith('-SNAPSHOT')) {
+                        final File artifactDir = new File(rootProject.ext.sharedDir,
+                                pom.groupId.replace('.', '/')
                                         + '/' + pom.artifactId
                                         + '/' + pom.version)
-                                delete fileTree(dir: artifactDir, include: 'maven-metadata.xml*')
-                        }
+                        delete fileTree(dir: artifactDir, include: 'maven-metadata.xml*')
                     }
                 }
+            }
+        }
+    }
+
+    repositories {
+        if (sonatype_publish) {
+            maven {
+                url = "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+                credentials {
+                    username = ossrhUsername
+                    password = ossrhPassword
+                }
+            }
+
+            maven {
+                url = "https://oss.sonatype.org/content/repositories/snapshots"
+                credentials {
+                    username = ossrhUsername
+                    password = ossrhPassword
+                }
+            }
+        } else {
+            maven {
+                url = "file://${sharedDir}"
             }
         }
     }

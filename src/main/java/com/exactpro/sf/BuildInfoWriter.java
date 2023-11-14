@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2023 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,6 @@ import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 import java.util.zip.ZipException;
 
-import org.apache.commons.lang3.StringUtils;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.TaskAction;
@@ -95,7 +94,7 @@ public class BuildInfoWriter extends DefaultTask {
             header = lines.subList(0, HEADER_SIZE);
             body = lines.subList(HEADER_SIZE, lines.size());
 
-            int columns = StringUtils.split(body.get(0).replaceAll("<.*?>",  ","), ",").length;
+            int columns = body.get(0).replaceAll("<.*?>",  ",").split(",").length;
             int newColumns = buildInfoMap.keySet().size() + PROPERTIES_COUNT;
 
             if(columns != newColumns) {
@@ -133,7 +132,7 @@ public class BuildInfoWriter extends DefaultTask {
         line.append("<td>");
         line.append(gitHash);
         line.append("<td>");
-        line.append(StringUtils.join(buildInfoMap.values(), "<td>"));
+        line.append(String.join("<td>", buildInfoMap.values()));
 
         List<String> lines = new ArrayList<String>();
 
@@ -149,7 +148,7 @@ public class BuildInfoWriter extends DefaultTask {
 
         header.add("<table border=\"1\" cellspacing=\"1\" cellpadding=\"2\" style=\"font-family:monospace\">");
         header.add(String.format("<tr><th rowspan=2>Build Number<th rowspan=2>Build Date<th rowspan=2>Dictionary Version<th rowspan=2>Release<th rowspan=2>Git Hash<th colspan=%s>Components", components.size()));
-        header.add("<tr><th>" + StringUtils.join(components, "<th>"));
+        header.add("<tr><th>" + String.join("<th>", components));
 
         return header;
     }

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2023 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
@@ -48,6 +49,7 @@ import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.PublishArtifact;
 import org.gradle.api.plugins.JavaPlugin;
+import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFile;
 import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.TaskAction;
@@ -76,11 +78,10 @@ public class CompatibilityChecker extends DefaultTask{
     private final static String SERVICES_XML_FILE_NAME = "SERVICES_XML_FILE_NAME";
     private final static String CORE_VERSION_PROPERTY = "CORE_VERSION_PROPERTY";
     private final static String CORE_VERSION = "CORE_VERSION";
-    
+    private final static String LIBS_SUBDIRECTORY = "libs";
+
     private ClassLoader classLoader;
-    @InputFile
     private File versionFile;
-    @InputFiles
     private List<File> cfgDirs;
     
     private boolean silent;
@@ -91,16 +92,18 @@ public class CompatibilityChecker extends DefaultTask{
     public void checkCompatibility() throws Exception {
         Project p = getProject();
         List<URL> urls = new ArrayList<>();
-        Configuration configuration = p.getConfigurations().getByName(JavaPlugin.RUNTIME_CONFIGURATION_NAME);
-        for (File f:configuration.getFiles()) {
+        Configuration configuration = p.getConfigurations().getByName(JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME);
+        for (File f: configuration.getFiles()) {
             urls.add(f.toURI().toURL());
         }
-        
-        for (PublishArtifact f:configuration.getArtifacts()) {
+        for (File f: p.fileTree(p.getBuildDir().toPath().resolve(LIBS_SUBDIRECTORY))) {
+            urls.add(f.toURI().toURL());
+        }
+        for (PublishArtifact f: configuration.getArtifacts()) {
             urls.add(f.getFile().toURI().toURL());
         }
         classLoader = URLClassLoader.newInstance(urls.toArray(new URL[0]), this.getClass().getClassLoader());
-        
+
         boolean success = true; 
         for (File cfgDir : cfgDirs) {
             System.out.println("Checking configDir:" + cfgDir);
@@ -312,8 +315,7 @@ public class CompatibilityChecker extends DefaultTask{
     public File getVersionFile() {
         return versionFile;
     }
-    
-    @InputFile
+
     public void setVersionFile(File versionFile) {
         this.versionFile = versionFile;
     }
@@ -323,11 +325,11 @@ public class CompatibilityChecker extends DefaultTask{
         return cfgDirs;
     }
 
-    @InputFiles
     public void setCfgDirs(List<File> cfgDirs) {
         this.cfgDirs = cfgDirs;
     }
-    
+
+    @Input
     public boolean getSilent() {
         return silent;
     }
@@ -336,6 +338,7 @@ public class CompatibilityChecker extends DefaultTask{
         silent = value;
     }
 
+    @Input
     public int getMinCoreRevision() {
         return minCoreRevision;
     }
