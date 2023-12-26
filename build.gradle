@@ -98,6 +98,8 @@ artifactory {
 publishing {
     publications {
         mavenJava(MavenPublication) {
+            from components.java
+
             if (sonatype_publish) {
                 beforeDeployment {
                     signing {
@@ -139,9 +141,9 @@ publishing {
                 pom {
                     if (version.endsWith('-SNAPSHOT')) {
                         final File artifactDir = new File(rootProject.ext.sharedDir,
-                                pom.groupId.replace('.', '/')
-                                        + '/' + pom.artifactId
-                                        + '/' + pom.version)
+                                groupId.replace('.', '/')
+                                        + '/' + artifactId
+                                        + '/' + version)
                         delete fileTree(dir: artifactDir, include: 'maven-metadata.xml*')
                     }
                 }
