@@ -14,8 +14,10 @@ if (sonatype_publish) {
     apply plugin: 'signing'
 }
 
+def versionSuffix = (sonatype_publish)? '': '-SNAPSHOT'
+
 group = 'com.exactpro.sailfish-gradle-plugin'
-version = "${sailfish_version_major}.${sailfish_version_minor}.${sailfish_version_maintenance}"
+version = "${sailfish_version_major}.${sailfish_version_minor}.${sailfish_version_maintenance}${versionSuffix}"
 archivesBaseName = 'sailfish-gradle-plugin'
 
 dependencies {
