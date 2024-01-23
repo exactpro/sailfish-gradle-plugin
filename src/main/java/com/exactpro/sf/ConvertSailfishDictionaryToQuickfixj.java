@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2024 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,13 +48,8 @@ import groovy.lang.Closure;
  */
 public class ConvertSailfishDictionaryToQuickfixj extends DefaultTask {
 
-    @InputDirectory
     private File inputDirectory;
-
-    @OutputDirectory
     private File outputDirectory;
-
-    @Input
     private String filterExpression;
 
     @SuppressWarnings("serial")
@@ -172,12 +167,10 @@ public class ConvertSailfishDictionaryToQuickfixj extends DefaultTask {
         return inputDirectory;
     }
 
-    @InputDirectory
     public void setInputDirectory(File inputDirectory) {
         this.inputDirectory = inputDirectory;
     }
 
-    @Input
     public void setFilterExpression(String filterExpression) {
         this.filterExpression = filterExpression;
     }
@@ -192,7 +185,6 @@ public class ConvertSailfishDictionaryToQuickfixj extends DefaultTask {
         return outputDirectory;
     }
 
-    @OutputDirectory
     public void setOutputDirectory(File outputDirectory) {
         this.outputDirectory = outputDirectory;
     }

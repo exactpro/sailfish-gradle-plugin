@@ -4,21 +4,23 @@ apply plugin: 'com.jfrog.artifactory'
 apply plugin: 'maven-publish'
 apply plugin: 'eclipse'
 apply plugin: 'groovy'
+apply plugin: 'com.gradle.plugin-publish'
 
 ext {
-    sharedDir        = file("${project.rootDir}/shared")
-    sonatype_publish = project.hasProperty('sonatypePublish') ? true : false
+    sharedDir      = file("${project.rootDir}/shared")
+    gradle_publish = project.hasProperty('gradle.publish.key') && project.hasProperty('gradle.publish.secret')
 }
 
-if (sonatype_publish) {
+if (gradle_publish) {
     apply plugin: 'signing'
 }
 
-def versionSuffix = (sonatype_publish)? '': '-SNAPSHOT'
+def versionMaintenance = (gradle_publish)? sailfish_version_maintenance: '0'
+def versionSuffix = (gradle_publish)? '': '-SNAPSHOT'
 
 group = 'com.exactpro.sailfish-gradle-plugin'
-version = "${sailfish_version_major}.${sailfish_version_minor}.${sailfish_version_maintenance}${versionSuffix}"
-archivesBaseName = 'sailfish-gradle-plugin'
+version = "${sailfish_version_major}.${sailfish_version_minor}.${versionMaintenance}${versionSuffix}"
+archivesBaseName = rootProject.name
 
 dependencies {
     implementation gradleApi()
@@ -29,12 +31,18 @@ dependencies {
     }
 
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
-    api group: 'org.freemarker', name: 'freemarker', version: '2.3.24-incubating'
+    api group: 'org.freemarker', name: 'freemarker', version: '2.3.30'
 
     implementation group: 'io.fixprotocol.orchestra', name: 'repository-quickfix', version: '1.5.0'
 
     implementation 'commons-io:commons-io:1.4'
-    implementation 'com.google.guava:guava:18.0'
+    implementation 'com.google.guava:guava:32.0.0-jre'
+}
+
+configurations.configureEach {
+    resolutionStrategy {
+        force 'org.apache.logging.log4j:log4j-core:2.18.0'
+    }
 }
 
 sourceCompatibility = JavaVersion.VERSION_11 //Java version compatibility to use when compiling Java source.
@@ -53,11 +61,13 @@ sourceSets {
 
 buildscript { // artifacrory plugin
     repositories {
-        jcenter()
+        mavenCentral()
+        gradlePluginPortal()
     }
     dependencies {
         classpath(group: 'org.jfrog.buildinfo', name: 'build-info-extractor-gradle', version: '4.4.12')
         classpath(group: 'com.bmuschko', name: 'gradle-tomcat-plugin', version: '2.2.2')
+        classpath(group: 'com.gradle.plugin-publish', name: 'com.gradle.plugin-publish.gradle.plugin', version: '1.2.1')
     }
 }
 
@@ -71,17 +81,13 @@ repositories {
         name 'MavenLocal' // for local builds only
         url sharedDir
     }
-    jcenter()
+    mavenCentral()
 }
 
-task zipFixTypes(type: Zip) {
-    from ('src/main/resources/fix/')
+tasks.register('zipFixTypes', Zip) {
+    from('src/main/resources/fix/')
     include('types.xml')
-    classifier = 'fixtypes'
-}
-
-artifacts {
-    archives zipFixTypes
+    archiveClassifier = 'fixtypes'
 }
 
 artifactory {
@@ -97,17 +103,13 @@ artifactory {
 
 publishing {
     publications {
-        mavenJava(MavenPublication) {
+        MavenJava(MavenPublication) {
             from components.java
 
-            if (sonatype_publish) {
-                beforeDeployment {
-                    signing {
-                        sign deployment
-                    }
-                }
+            artifact(zipFixTypes)
 
-                pom.project {
+            if (gradle_publish) {
+                pom {
                     name 'Exactpro Sailfish Gradle plugin'
                     packaging 'jar'
                     // optionally artifactId can be defined here
@@ -152,46 +154,50 @@ publishing {
     }
 
     repositories {
-        if (sonatype_publish) {
-            maven {
-                url = "https://oss.sonatype.org/service/local/staging/deploy/maven2"
-                credentials {
-                    username = ossrhUsername
-                    password = ossrhPassword
-                }
-            }
-
-            maven {
-                url = "https://oss.sonatype.org/content/repositories/snapshots"
-                credentials {
-                    username = ossrhUsername
-                    password = ossrhPassword
-                }
-            }
-        } else {
-            maven {
-                url = "file://${sharedDir}"
-            }
+        maven {
+            url = "file://${sharedDir}"
         }
     }
 }
 
-task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = 'sources'
+tasks.register('sourcesJar', Jar) {
+    dependsOn classes
+    archiveClassifier = 'sources'
     from sourceSets.main.allSource
 }
 
-task javadocJar(type: Jar, dependsOn: classes) {
-    classifier = 'javadoc'
+tasks.register('javadocJar', Jar) {
+    dependsOn classes
+    archiveClassifier = 'javadoc'
     from javadoc
 }
 
 artifacts {
-    archives sourcesJar, javadocJar
+    archives sourcesJar, javadocJar, zipFixTypes
 }
 
-if (sonatype_publish) {
+gradlePlugin {
+    website = 'https://github.com/Exactpro/sailfish-gradle-plugin'
+    vcsUrl = 'https://github.com/Exactpro/sailfish-gradle-plugin.git'
+    plugins {
+        sailfish {
+            id = 'com.exactpro.sf.sailfish'
+            displayName = 'Gradle plugin for Sailfish'
+            description = 'Gradle toolset for Sailfish build. Sailfish is Test automation solution we\'re releasing to open source.'
+            tags.set(['Exactpro', 'Sailfish'])
+            implementationClass = 'com.exactpro.sf.Sailfish'
+        }
+    }
+}
+
+if (gradle_publish) {
+    tasks.withType(Sign).configureEach {
+        onlyIf {
+            project.hasProperty('signing.keyId') && project.hasProperty('signing.password')
+        }
+    }
+
     signing {
-        sign configurations.archives
+        sign publishing.publications.MavenJava
     }
 }
