@@ -110,30 +110,30 @@ publishing {
 
             if (gradle_publish) {
                 pom {
-                    name 'Exactpro Sailfish Gradle plugin'
+                    name = 'Exactpro Sailfish Gradle plugin'
                     packaging 'jar'
                     // optionally artifactId can be defined here
                     description 'Gradle toolset for Sailfish build. Sailfish is Test automation solution we\'re releasing to open source.'
-                    url 'https://github.com/Exactpro/sailfish-gradle-plugin'
+                    url = 'https://github.com/Exactpro/sailfish-gradle-plugin'
 
                     scm {
-                        connection 'scm:git:https://github.com/Exactpro/sailfish-gradle-plugin'
-                        developerConnection 'scm:git:https://github.com/Exactpro/sailfish-gradle-plugin'
-                        url 'https://github.com/Exactpro/sailfish-gradle-plugin'
+                        connection = 'scm:git:https://github.com/Exactpro/sailfish-gradle-plugin'
+                        developerConnection = 'scm:git:https://github.com/Exactpro/sailfish-gradle-plugin'
+                        url = 'https://github.com/Exactpro/sailfish-gradle-plugin'
                     }
 
                     licenses {
                         license {
-                            name 'The Apache License, Version 2.0'
-                            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                            name = 'The Apache License, Version 2.0'
+                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
                         }
                     }
 
                     developers {
                         developer {
-                            id 'Nikita-Smirnov-Exactpro'
-                            name 'Nikita Smirnov'
-                            email 'nikita.smirnov@exactprosystems.com'
+                            id = 'Nikita-Smirnov-Exactpro'
+                            name = 'Nikita Smirnov'
+                            email = 'nikita.smirnov@exactprosystems.com'
                         }
                     }
                 }
